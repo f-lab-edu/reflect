@@ -36,9 +36,4 @@ data class Member protected constructor(
         }
     }
 
-    override fun equals(other: Any?): Boolean =
-        this === other || (other is Member && id != null && id == other.id)
-
-    override fun hashCode(): Int = id?.hashCode() ?: 0
-
 }
