@@ -12,9 +12,8 @@ data class Question protected constructor(
     @Column(name = "question", nullable = false)
     val id: Long? = null,
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "question_category_id", nullable = false)
-    val questionCategory: QuestionCategory,
+    @Column(name = "question_category_id", nullable = false)
+    val questionCategoryId: Long,
 
     @Column(name = "content", length = 200, nullable = false)
     val content: String,
