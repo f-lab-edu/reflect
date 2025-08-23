@@ -2,7 +2,6 @@ package kr.co.archan.reflect.question.domain
 
 import jakarta.persistence.*
 import kr.co.archan.reflect.global.entity.BaseEntity
-import kr.co.archan.reflect.member.domain.Member
 
 @Entity
 @Table(name = "question_answer")
@@ -13,13 +12,11 @@ class QuestionAnswer protected constructor(
     @Column(name = "id", nullable = false)
     val id: Long? = null,
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    val member: Member,
+    @Column(name = "member_id", nullable = false)
+    val memberId: Long,
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "question_id", nullable = false)
-    val question: Question,
+    @Column(name = "question_id", nullable = false)
+    val questionId: Long,
 
     @Lob
     @Column(name = "content", nullable = false)
