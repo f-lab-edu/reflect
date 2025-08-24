@@ -9,7 +9,7 @@ data class Question protected constructor(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "question", nullable = false)
+    @Column(name = "id", nullable = false)
     val id: Long? = null,
 
     @Column(name = "question_category_id", nullable = false)
