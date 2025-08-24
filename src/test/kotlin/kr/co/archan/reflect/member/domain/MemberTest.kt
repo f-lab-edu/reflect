@@ -1,6 +1,5 @@
 package kr.co.archan.reflect.member.domain
 
-import kr.co.archan.reflect.global.exception.ProductException
 import kr.co.archan.reflect.member.exception.InvalidEmailException
 import kr.co.archan.reflect.member.exception.InvalidNameException
 import org.junit.jupiter.api.Assertions.*
