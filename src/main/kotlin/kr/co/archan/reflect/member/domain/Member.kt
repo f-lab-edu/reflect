@@ -32,7 +32,7 @@ data class Member protected constructor(
         fun signUp(email: String, password: String, name: String): Member {
             requireAndThrowProductException(Validator.isEmailValid(email)) { InvalidEmailException() }
             requireAndThrowProductException(Validator.isNameValid(name)) { InvalidNameException() }
-            return Member(id = null, email = email, password = password, name = name)
+            return Member(email = email, password = password, name = name)
         }
     }
 
