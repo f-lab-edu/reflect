@@ -1,5 +1,6 @@
 package kr.co.archan.reflect.member.domain
 
+import kr.co.archan.reflect.global.vo.Email
 import kr.co.archan.reflect.member.exception.InvalidEmailException
 import kr.co.archan.reflect.member.exception.InvalidNameException
 import org.junit.jupiter.api.Assertions.*
@@ -17,7 +18,7 @@ class MemberTest {
         val password = "securePassword123!"
         val name = "홍길동"
 
-        val member = Member.signUp(email, password, name)
+        val member = Member.signUp(Email.of(email), password, name)
 
         assertAll("Member 생성",
             { assertNull(member.id) },
@@ -34,7 +35,7 @@ class MemberTest {
         val password = "password123"
         val name = "홍길동"
 
-        assertThrows<InvalidEmailException> { Member.signUp(email, password, name) }
+        assertThrows<InvalidEmailException> { Member.signUp(Email.of(email), password, name) }
     }
 
     @Test
@@ -44,7 +45,7 @@ class MemberTest {
         val password = "password123"
         val name = "홍길동"
 
-        assertThrows<InvalidEmailException> { Member.signUp(email, password, name) }
+        assertThrows<InvalidEmailException> { Member.signUp(Email.of(email), password, name) }
     }
 
     @Test
@@ -54,7 +55,7 @@ class MemberTest {
         val password = "password123"
         val name = "홍길동"
 
-        assertThrows<InvalidEmailException> { Member.signUp(email, password, name) }
+        assertThrows<InvalidEmailException> { Member.signUp(Email.of(email), password, name) }
     }
 
     @Test
@@ -64,7 +65,7 @@ class MemberTest {
         val password = "password123"
         val name = ""
 
-        assertThrows<InvalidNameException> { Member.signUp(email, password, name) }
+        assertThrows<InvalidNameException> { Member.signUp(Email.of(email), password, name) }
     }
 
     @Test
@@ -74,7 +75,7 @@ class MemberTest {
         val password = "password123"
         val name = "abcdefghijklmnopqrstuvwxyz"
 
-        assertThrows<InvalidNameException> { Member.signUp(email, password, name) }
+        assertThrows<InvalidNameException> { Member.signUp(Email.of(email), password, name) }
     }
     
 }
