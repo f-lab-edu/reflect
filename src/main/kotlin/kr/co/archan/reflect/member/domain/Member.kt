@@ -4,6 +4,7 @@ import jakarta.persistence.*
 import kr.co.archan.reflect.global.entity.BaseEntity
 import kr.co.archan.reflect.global.util.Validator
 import kr.co.archan.reflect.global.util.extension.requireAndThrowProductException
+import kr.co.archan.reflect.global.vo.Email
 import kr.co.archan.reflect.member.exception.InvalidEmailException
 import kr.co.archan.reflect.member.exception.InvalidNameException
 import kr.co.archan.reflect.member.exception.NoMemberException
@@ -29,10 +30,8 @@ data class Member protected constructor(
 ) : BaseEntity() {
 
     companion object {
-        fun signUp(email: String, password: String, name: String): Member {
-            requireAndThrowProductException(Validator.isEmailValid(email)) { InvalidEmailException() }
-            requireAndThrowProductException(Validator.isNameValid(name)) { InvalidNameException() }
-            return Member(email = email, password = password, name = name)
+        fun signUp(email: Email, password: String, name: String): Member {
+            return Member(email = email.asString(), password = password, name = name)
         }
     }
 
