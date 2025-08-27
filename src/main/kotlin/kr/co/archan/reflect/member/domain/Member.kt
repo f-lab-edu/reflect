@@ -2,13 +2,7 @@ package kr.co.archan.reflect.member.domain
 
 import jakarta.persistence.*
 import kr.co.archan.reflect.global.entity.BaseEntity
-import kr.co.archan.reflect.global.util.Validator
-import kr.co.archan.reflect.global.util.extension.requireAndThrowProductException
 import kr.co.archan.reflect.global.vo.Email
-import kr.co.archan.reflect.member.exception.InvalidEmailException
-import kr.co.archan.reflect.member.exception.InvalidNameException
-import kr.co.archan.reflect.member.exception.NoMemberException
-
 @Entity
 @Table(name = "member")
 data class Member protected constructor(
@@ -16,7 +10,7 @@ data class Member protected constructor(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    val id: Long? = null,
+    val id: Long = 0L,
 
     @Column(name = "email", length = 255, nullable = false, unique = true)
     val email: String,

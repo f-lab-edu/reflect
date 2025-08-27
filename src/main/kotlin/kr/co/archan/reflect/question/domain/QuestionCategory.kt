@@ -10,7 +10,7 @@ data class QuestionCategory protected constructor (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    val id: Long? = null,
+    val id: Long = 0L,
 
     @Column(name = "name", length = 50, nullable = false)
     val name: String,
