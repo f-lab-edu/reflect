@@ -56,14 +56,3 @@ CREATE TABLE question_answer_like (
     CONSTRAINT fk_question_answer_like_member FOREIGN KEY (member_id) REFERENCES member(id),
     CONSTRAINT fk_question_answer_like_answer FOREIGN KEY (question_answer_id) REFERENCES question_answer(id)
 );
-
--- 성능 향상을 위한 인덱스 생성
-CREATE INDEX idx_member_email ON member(email);
-CREATE INDEX idx_question_category ON question(question_category_id);
-CREATE INDEX idx_question_answer_member ON question_answer(member_id);
-CREATE INDEX idx_question_answer_question ON question_answer(question_id);
-CREATE INDEX idx_question_answer_like_member ON question_answer_like(member_id);
-CREATE INDEX idx_question_answer_like_answer ON question_answer_like(question_answer_id);
-
--- 중복 좋아요 방지를 위한 유니크 제약조건 추가
-ALTER TABLE question_answer_like ADD CONSTRAINT uk_member_answer_like UNIQUE (member_id, question_answer_id);
