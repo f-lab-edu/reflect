@@ -21,6 +21,9 @@ data class Member protected constructor(
     @Column(name = "name", length = 20, nullable = false)
     val name: String,
 
+    @Column(name = "is_withdrawn", nullable = false)
+    val isWithdrawn: Boolean = false,
+
 ) : BaseEntity() {
 
     companion object {

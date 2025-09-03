@@ -6,6 +6,7 @@ CREATE TABLE member (
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(512) NOT NULL,
     name VARCHAR(20) NOT NULL,
+    is_withdrawn BOOLEAN NOT NULL DEFAULT FALSE,
     created_at DATETIME(6) NOT NULL,
     updated_at DATETIME(6) NOT NULL
 );
