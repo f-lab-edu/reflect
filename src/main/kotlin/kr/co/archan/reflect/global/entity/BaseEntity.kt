@@ -19,7 +19,4 @@ abstract class BaseEntity {
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false, columnDefinition = "DATETIME(6)")
     var updatedAt: LocalDateTime? = null
-
-    @Column(name = "is_deleted", nullable = false)
-    var isDeleted: Boolean = false
 }

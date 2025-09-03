@@ -7,8 +7,7 @@ CREATE TABLE member (
     password VARCHAR(512) NOT NULL,
     name VARCHAR(20) NOT NULL,
     created_at DATETIME(6) NOT NULL,
-    updated_at DATETIME(6) NOT NULL,
-    is_deleted BOOLEAN NOT NULL DEFAULT FALSE
+    updated_at DATETIME(6) NOT NULL
 );
 
 -- 질문 카테고리 테이블 생성
@@ -16,8 +15,7 @@ CREATE TABLE question_category (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
     created_at DATETIME(6) NOT NULL,
-    updated_at DATETIME(6) NOT NULL,
-    is_deleted BOOLEAN NOT NULL DEFAULT FALSE
+    updated_at DATETIME(6) NOT NULL
 );
 
 -- 질문 테이블 생성
@@ -27,7 +25,6 @@ CREATE TABLE question (
     content VARCHAR(200) NOT NULL,
     created_at DATETIME(6) NOT NULL,
     updated_at DATETIME(6) NOT NULL,
-    is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
     CONSTRAINT fk_question_category FOREIGN KEY (question_category_id) REFERENCES question_category(id)
 );
 
@@ -40,7 +37,6 @@ CREATE TABLE question_answer (
     is_private BOOLEAN NOT NULL DEFAULT FALSE,
     created_at DATETIME(6) NOT NULL,
     updated_at DATETIME(6) NOT NULL,
-    is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
     CONSTRAINT fk_question_answer_member FOREIGN KEY (member_id) REFERENCES member(id),
     CONSTRAINT fk_question_answer_question FOREIGN KEY (question_id) REFERENCES question(question)
 );
@@ -52,7 +48,6 @@ CREATE TABLE question_answer_like (
     question_answer_id BIGINT NOT NULL,
     created_at DATETIME(6) NOT NULL,
     updated_at DATETIME(6) NOT NULL,
-    is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
     CONSTRAINT fk_question_answer_like_member FOREIGN KEY (member_id) REFERENCES member(id),
     CONSTRAINT fk_question_answer_like_answer FOREIGN KEY (question_answer_id) REFERENCES question_answer(id)
 );
