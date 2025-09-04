@@ -1,7 +1,6 @@
 package kr.co.archan.reflect.member.domain
 
 import jakarta.persistence.*
-import kr.co.archan.reflect.global.vo.Email
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
@@ -40,8 +39,8 @@ data class Member protected constructor(
 ) {
 
     companion object {
-        fun signUp(email: Email, password: String, name: String): Member {
-            return Member(email = email.asString(), password = password, name = name)
+        fun signUp(email: String, password: String, name: String): Member {
+            return Member(email = email, password = password, name = name)
         }
     }
 
