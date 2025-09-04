@@ -1,10 +1,15 @@
 package kr.co.archan.reflect.member.domain
 
 import jakarta.persistence.*
-import kr.co.archan.reflect.global.entity.BaseEntity
 import kr.co.archan.reflect.global.vo.Email
+import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.annotation.LastModifiedDate
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import java.time.LocalDateTime
+
 @Entity
 @Table(name = "member")
+@EntityListeners(AuditingEntityListener::class)
 data class Member protected constructor(
 
     @Id
@@ -24,7 +29,15 @@ data class Member protected constructor(
     @Column(name = "is_withdrawn", nullable = false)
     val isWithdrawn: Boolean = false,
 
-) : BaseEntity() {
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME(6)")
+    var createdAt: LocalDateTime? = null,
+
+    @LastModifiedDate
+    @Column(name = "updated_at", nullable = false, columnDefinition = "DATETIME(6)")
+    var updatedAt: LocalDateTime? = null
+
+) {
 
     companion object {
         fun signUp(email: Email, password: String, name: String): Member {

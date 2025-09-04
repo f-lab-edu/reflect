@@ -1,10 +1,14 @@
 package kr.co.archan.reflect.question.domain
 
 import jakarta.persistence.*
-import kr.co.archan.reflect.global.entity.BaseEntity
+import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.annotation.LastModifiedDate
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "question_answer")
+@EntityListeners(AuditingEntityListener::class)
 class QuestionAnswer protected constructor(
 
     @Id
@@ -25,4 +29,12 @@ class QuestionAnswer protected constructor(
     @Column(name = "is_private", nullable = false)
     val isPrivate: Boolean = false,
 
-) : BaseEntity()
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME(6)")
+    var createdAt: LocalDateTime? = null,
+
+    @LastModifiedDate
+    @Column(name = "updated_at", nullable = false, columnDefinition = "DATETIME(6)")
+    var updatedAt: LocalDateTime? = null
+
+)
