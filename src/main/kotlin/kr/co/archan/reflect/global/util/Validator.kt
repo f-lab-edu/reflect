@@ -54,4 +54,13 @@ object Validator {
 
     fun isNameValid(name: String): Boolean =
         name.isNotBlank() && name.trim().length in 1..20
+
+    fun isPasswordValid(password: String): Boolean {
+        if (password.length < 8 || password.length > 64) return false
+        
+        if (!password.any { it.isDigit() }) return false
+        if (!password.any { !it.isLetterOrDigit() && !it.isWhitespace() }) return false
+        
+        return true
+    }
 }

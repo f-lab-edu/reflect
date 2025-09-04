@@ -243,4 +243,68 @@ class ValidatorTest {
         assertFalse(Validator.isNameValid(name))
     }
 
+    @Test
+    @DisplayName("isPasswordValid 성공 - 일반적인 패스워드")
+    fun `isPasswordValid 성공 - 일반적인 패스워드`() {
+        val password = "password123!"
+
+        assertTrue(Validator.isPasswordValid(password))
+    }
+
+    @Test
+    @DisplayName("isPasswordValid 실패 - 7자 이하")
+    fun `isPasswordValid 실패 - 7자 이하`() {
+        val password = "pass1!"
+
+        assertFalse(Validator.isPasswordValid(password))
+    }
+
+    @Test
+    @DisplayName("isPasswordValid 실패 - 65자 이상")
+    fun `isPasswordValid 실패 - 65자 이상`() {
+        val password = "a".repeat(63) + "1!"
+
+        assertFalse(Validator.isPasswordValid(password))
+    }
+
+    @Test
+    @DisplayName("isPasswordValid 실패 - 숫자 없음")
+    fun `isPasswordValid 실패 - 숫자 없음`() {
+        val password = "passwordwithoutdigit!"
+
+        assertFalse(Validator.isPasswordValid(password))
+    }
+
+    @Test
+    @DisplayName("isPasswordValid 실패 - 특수문자 없음")
+    fun `isPasswordValid 실패 - 특수문자 없음`() {
+        val password = "passwordwithoutspecial123"
+
+        assertFalse(Validator.isPasswordValid(password))
+    }
+
+    @Test
+    @DisplayName("isPasswordValid 실패 - 숫자와 특수문자 모두 없음")
+    fun `isPasswordValid 실패 - 숫자와 특수문자 모두 없음`() {
+        val password = "passwordonly"
+
+        assertFalse(Validator.isPasswordValid(password))
+    }
+
+    @Test
+    @DisplayName("isPasswordValid 실패 - 빈 문자열")
+    fun `isPasswordValid 실패 - 빈 문자열`() {
+        val password = ""
+
+        assertFalse(Validator.isPasswordValid(password))
+    }
+
+    @Test
+    @DisplayName("isPasswordValid 실패 - 공백 포함")
+    fun `isPasswordValid 실패 - 공백 포함`() {
+        val password = "password 123"
+
+        assertFalse(Validator.isPasswordValid(password))
+    }
+
 }
