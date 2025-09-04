@@ -17,7 +17,7 @@ data class Member protected constructor(
     @Column(name = "id", nullable = false)
     val id: Long = 0L,
 
-    @Column(name = "email", length = 255, nullable = false, unique = true)
+    @Column(name = "email", length = 254, nullable = false, unique = true)
     val email: String,
 
     @Column(name = "password", length = 512, nullable = false)
