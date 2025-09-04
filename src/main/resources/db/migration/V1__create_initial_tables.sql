@@ -21,12 +21,11 @@ CREATE TABLE question_category (
 
 -- 질문 테이블 생성
 CREATE TABLE question (
-    question BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     question_category_id BIGINT NOT NULL,
     content VARCHAR(200) NOT NULL,
     created_at DATETIME(6) NOT NULL,
-    updated_at DATETIME(6) NOT NULL,
-    CONSTRAINT fk_question_category FOREIGN KEY (question_category_id) REFERENCES question_category(id)
+    updated_at DATETIME(6) NOT NULL
 );
 
 -- 질문 답변 테이블 생성
@@ -37,9 +36,7 @@ CREATE TABLE question_answer (
     content LONGTEXT NOT NULL,
     is_private BOOLEAN NOT NULL DEFAULT FALSE,
     created_at DATETIME(6) NOT NULL,
-    updated_at DATETIME(6) NOT NULL,
-    CONSTRAINT fk_question_answer_member FOREIGN KEY (member_id) REFERENCES member(id),
-    CONSTRAINT fk_question_answer_question FOREIGN KEY (question_id) REFERENCES question(question)
+    updated_at DATETIME(6) NOT NULL
 );
 
 -- 질문 답변 좋아요 테이블 생성
@@ -48,7 +45,5 @@ CREATE TABLE question_answer_like (
     member_id BIGINT NOT NULL,
     question_answer_id BIGINT NOT NULL,
     created_at DATETIME(6) NOT NULL,
-    updated_at DATETIME(6) NOT NULL,
-    CONSTRAINT fk_question_answer_like_member FOREIGN KEY (member_id) REFERENCES member(id),
-    CONSTRAINT fk_question_answer_like_answer FOREIGN KEY (question_answer_id) REFERENCES question_answer(id)
+    updated_at DATETIME(6) NOT NULL
 );
