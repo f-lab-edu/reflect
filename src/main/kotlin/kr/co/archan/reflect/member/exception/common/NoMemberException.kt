@@ -1,4 +1,4 @@
-package kr.co.archan.reflect.member.exception
+package kr.co.archan.reflect.member.exception.common
 
 import kr.co.archan.reflect.global.exception.base.ProductException
 import org.springframework.http.HttpStatus
