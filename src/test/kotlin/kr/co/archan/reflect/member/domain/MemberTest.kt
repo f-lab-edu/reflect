@@ -1,5 +1,8 @@
 package kr.co.archan.reflect.member.domain
 
+import jakarta.validation.Validation
+import jakarta.validation.Validator
+
 import kr.co.archan.reflect.global.exception.common.InvalidInputException
 import kr.co.archan.reflect.member.dto.request.MemberSignupRequest
 import kr.co.archan.reflect.member.exception.types.MemberInvalidInputField
@@ -10,6 +13,23 @@ import org.junit.jupiter.api.assertThrows
 
 
 class MemberTest {
+
+    private val validator: Validator = Validation.buildDefaultValidatorFactory().validator
+
+    private fun validateOrThrow(req: MemberSignupRequest) {
+        val violations = validator.validate(req)
+        if (violations.isNotEmpty()) {
+            val specs = violations.map { v ->
+                when (v.propertyPath.toString()) {
+                    "email" -> MemberInvalidInputField.EMAIL
+                    "password" -> MemberInvalidInputField.PASSWORD
+                    "name" -> MemberInvalidInputField.NAME
+                    else -> MemberInvalidInputField.UNKNOWN
+                }
+            }
+            throw InvalidInputException(specs)
+        }
+    }
 
     @Test
     @DisplayName("signUp 성공")
@@ -34,11 +54,10 @@ class MemberTest {
         val email = "invalid-email"
         val password = "securePassword123!"
         val name = "홍길동"
-
-        val exception = assertThrows<InvalidInputException> { 
-            MemberSignupRequest(email, password, name) 
+        val exception = assertThrows<InvalidInputException> {
+            validateOrThrow(MemberSignupRequest(email, password, name))
         }
-        assertEquals(MemberInvalidInputField.EMAIL, exception.field)
+        assertTrue(exception.specs.contains(MemberInvalidInputField.EMAIL))
     }
 
     @Test
@@ -48,10 +67,10 @@ class MemberTest {
         val password = "securePassword123!"
         val name = ""
 
-        val exception = assertThrows<InvalidInputException> { 
-            MemberSignupRequest(email, password, name) 
+        val exception = assertThrows<InvalidInputException> {
+            validateOrThrow(MemberSignupRequest(email, password, name))
         }
-        assertEquals(MemberInvalidInputField.NAME, exception.field)
+        assertTrue(exception.specs.contains(MemberInvalidInputField.NAME))
     }
 
     @Test
@@ -60,11 +79,10 @@ class MemberTest {
         val email = "test@example.com"
         val password = "weak"
         val name = "홍길동"
-
-        val exception = assertThrows<InvalidInputException> { 
-            MemberSignupRequest(email, password, name) 
+        val exception = assertThrows<InvalidInputException> {
+            validateOrThrow(MemberSignupRequest(email, password, name))
         }
-        assertEquals(MemberInvalidInputField.PASSWORD, exception.field)
+        assertTrue(exception.specs.contains(MemberInvalidInputField.PASSWORD))
     }
 
     @Test
