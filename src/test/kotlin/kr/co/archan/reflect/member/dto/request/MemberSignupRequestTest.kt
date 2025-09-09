@@ -6,8 +6,27 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import jakarta.validation.Validation
+import jakarta.validation.Validator
 
 class MemberSignupRequestTest {
+
+    private val validator: Validator = Validation.buildDefaultValidatorFactory().validator
+
+    private fun validateOrThrow(req: MemberSignupRequest) {
+        val violations = validator.validate(req)
+        if (violations.isNotEmpty()) {
+            val specs = violations.map { v ->
+                when (v.propertyPath.toString()) {
+                    "email" -> MemberInvalidInputField.EMAIL
+                    "password" -> MemberInvalidInputField.PASSWORD
+                    "name" -> MemberInvalidInputField.NAME
+                    else -> MemberInvalidInputField.UNKNOWN
+                }
+            }
+            throw InvalidInputException(specs)
+        }
+    }
 
     @Test
     @DisplayName("MemberSignupRequest 생성 성공")
@@ -32,8 +51,8 @@ class MemberSignupRequestTest {
         val password = "securePassword123!"
         val name = "홍길동"
 
-        val exception = assertThrows<InvalidInputException> { MemberSignupRequest(email, password, name) }
-        assertEquals(MemberInvalidInputField.EMAIL, exception.field)
+        val exception = assertThrows<InvalidInputException> { validateOrThrow(MemberSignupRequest(email, password, name)) }
+        assertTrue(exception.specs.contains(MemberInvalidInputField.EMAIL))
     }
 
     @Test
@@ -43,8 +62,8 @@ class MemberSignupRequestTest {
         val password = "securePassword123!"
         val name = "홍길동"
 
-        val exception = assertThrows<InvalidInputException> { MemberSignupRequest(email, password, name) }
-        assertEquals(MemberInvalidInputField.EMAIL, exception.field)
+        val exception = assertThrows<InvalidInputException> { validateOrThrow(MemberSignupRequest(email, password, name)) }
+        assertTrue(exception.specs.contains(MemberInvalidInputField.EMAIL))
     }
 
     @Test
@@ -54,8 +73,8 @@ class MemberSignupRequestTest {
         val password = "securePassword123!"
         val name = "홍길동"
 
-        val exception = assertThrows<InvalidInputException> { MemberSignupRequest(email, password, name) }
-        assertEquals(MemberInvalidInputField.EMAIL, exception.field)
+        val exception = assertThrows<InvalidInputException> { validateOrThrow(MemberSignupRequest(email, password, name)) }
+        assertTrue(exception.specs.contains(MemberInvalidInputField.EMAIL))
     }
 
     @Test
@@ -65,8 +84,8 @@ class MemberSignupRequestTest {
         val password = "securePassword123!"
         val name = ""
 
-        val exception = assertThrows<InvalidInputException> { MemberSignupRequest(email, password, name) }
-        assertEquals(MemberInvalidInputField.NAME, exception.field)
+        val exception = assertThrows<InvalidInputException> { validateOrThrow(MemberSignupRequest(email, password, name)) }
+        assertTrue(exception.specs.contains(MemberInvalidInputField.NAME))
     }
 
     @Test
@@ -76,8 +95,8 @@ class MemberSignupRequestTest {
         val password = "securePassword123!"
         val name = "홍길동홍길동홍길동홍길동홍길동홍길동홍길동"
 
-        val exception = assertThrows<InvalidInputException> { MemberSignupRequest(email, password, name) }
-        assertEquals(MemberInvalidInputField.NAME, exception.field)
+        val exception = assertThrows<InvalidInputException> { validateOrThrow(MemberSignupRequest(email, password, name)) }
+        assertTrue(exception.specs.contains(MemberInvalidInputField.NAME))
     }
 
     @Test
@@ -87,8 +106,8 @@ class MemberSignupRequestTest {
         val password = "pass1!"
         val name = "홍길동"
 
-        val exception = assertThrows<InvalidInputException> { MemberSignupRequest(email, password, name) }
-        assertEquals(MemberInvalidInputField.PASSWORD, exception.field)
+        val exception = assertThrows<InvalidInputException> { validateOrThrow(MemberSignupRequest(email, password, name)) }
+        assertTrue(exception.specs.contains(MemberInvalidInputField.PASSWORD))
     }
 
     @Test
@@ -98,8 +117,8 @@ class MemberSignupRequestTest {
         val password = "verylongpasswordverylongpasswordverylongpasswordverylongpaslong1!"
         val name = "홍길동"
 
-        val exception = assertThrows<InvalidInputException> { MemberSignupRequest(email, password, name) }
-        assertEquals(MemberInvalidInputField.PASSWORD, exception.field)
+        val exception = assertThrows<InvalidInputException> { validateOrThrow(MemberSignupRequest(email, password, name)) }
+        assertTrue(exception.specs.contains(MemberInvalidInputField.PASSWORD))
     }
 
     @Test
@@ -109,8 +128,8 @@ class MemberSignupRequestTest {
         val password = "passwordwithoutdigit!"
         val name = "홍길동"
 
-        val exception = assertThrows<InvalidInputException> { MemberSignupRequest(email, password, name) }
-        assertEquals(MemberInvalidInputField.PASSWORD, exception.field)
+        val exception = assertThrows<InvalidInputException> { validateOrThrow(MemberSignupRequest(email, password, name)) }
+        assertTrue(exception.specs.contains(MemberInvalidInputField.PASSWORD))
     }
 
     @Test
@@ -120,7 +139,7 @@ class MemberSignupRequestTest {
         val password = "passwordwithoutspecial123"
         val name = "홍길동"
 
-        val exception = assertThrows<InvalidInputException> { MemberSignupRequest(email, password, name) }
-        assertEquals(MemberInvalidInputField.PASSWORD, exception.field)
+        val exception = assertThrows<InvalidInputException> { validateOrThrow(MemberSignupRequest(email, password, name)) }
+        assertTrue(exception.specs.contains(MemberInvalidInputField.PASSWORD))
     }
 }
