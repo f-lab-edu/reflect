@@ -1,19 +1,16 @@
 package kr.co.archan.reflect.member.dto.request
 
-import kr.co.archan.reflect.global.util.Validator
-import kr.co.archan.reflect.global.util.extension.requireAndThrowProductException
-import kr.co.archan.reflect.member.exception.InvalidEmailException
-import kr.co.archan.reflect.member.exception.InvalidNameException
-import kr.co.archan.reflect.member.exception.InvalidPasswordException
+import kr.co.archan.reflect.global.validation.annotation.ValidEmail
+import kr.co.archan.reflect.global.validation.annotation.ValidName
+import kr.co.archan.reflect.global.validation.annotation.ValidPassword
 
 data class MemberSignupRequest(
+    @field:ValidEmail
     val email: String,
+    
+    @field:ValidPassword
     val password: String,
+    
+    @field:ValidName
     val name: String
-) {
-    init {
-        requireAndThrowProductException(Validator.isNameValid(name)) { InvalidNameException() }
-        requireAndThrowProductException(Validator.isEmailValid(email)) { InvalidEmailException() }
-        requireAndThrowProductException(Validator.isPasswordValid(password)) { InvalidPasswordException() }
-    }
-}
+)
