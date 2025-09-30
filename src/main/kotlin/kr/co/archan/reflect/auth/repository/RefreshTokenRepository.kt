@@ -10,9 +10,10 @@ import java.util.concurrent.TimeUnit
 
 @Repository
 class RefreshTokenRepository (
-    private val stringRedisTemplate: StringRedisTemplate
+    private val stringRedisTemplate: StringRedisTemplate,
+    private val crypto: Crypto
 ){
-    private fun key(value: String) = "rt:${Crypto.sha256(value)}"
+    private fun key(value: String) = "rt:${crypto.sha256WithNoSalt(value)}"
 
     fun save(token: RefreshToken) {
         val ttl = Duration.between(Instant.now(), token.expiresAt)

@@ -3,9 +3,17 @@ package kr.co.archan.reflect.global.util
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
 import java.util.*
 
 class CryptoTest {
+
+    private lateinit var crypto: Crypto
+
+    @BeforeEach
+    fun setUp() {
+        crypto = Crypto("test-secret-key")
+    }
 
     @Test
     @DisplayName("sha256 - 기본 문자열 해시 생성")
@@ -14,7 +22,7 @@ class CryptoTest {
         val input = "hello world"
         
         // when
-        val result = Crypto.sha256(input)
+        val result = crypto.sha256WithNoSalt(input)
         
         // then
         assertNotNull(result)
@@ -35,8 +43,8 @@ class CryptoTest {
         val input = "test string"
         
         // when
-        val result1 = Crypto.sha256(input)
-        val result2 = Crypto.sha256(input)
+        val result1 = crypto.sha256WithNoSalt(input)
+        val result2 = crypto.sha256WithNoSalt(input)
         
         // then
         assertEquals(result1, result2)
@@ -50,8 +58,8 @@ class CryptoTest {
         val input2 = "string2"
         
         // when
-        val result1 = Crypto.sha256(input1)
-        val result2 = Crypto.sha256(input2)
+        val result1 = crypto.sha256WithNoSalt(input1)
+        val result2 = crypto.sha256WithNoSalt(input2)
         
         // then
         assertNotEquals(result1, result2)
@@ -64,14 +72,14 @@ class CryptoTest {
         val input = ""
         
         // when
-        val result = Crypto.sha256(input)
+        val result = crypto.sha256WithNoSalt(input)
         
         // then
         assertNotNull(result)
         assertEquals(43, result.length)
         
         // 빈 문자열의 SHA-256 해시값은 항상 동일
-        val expectedEmpty = Crypto.sha256("")
+        val expectedEmpty = crypto.sha256WithNoSalt("")
         assertEquals(expectedEmpty, result)
     }
 
@@ -82,7 +90,7 @@ class CryptoTest {
         val input = "a".repeat(1000) // 1000자 문자열
         
         // when
-        val result = Crypto.sha256(input)
+        val result = crypto.sha256WithNoSalt(input)
         
         // then
         assertNotNull(result)
@@ -96,7 +104,7 @@ class CryptoTest {
         val input = "!@#$%^&*()_+-=[]{}|;:'\",.<>?/~`"
         
         // when
-        val result = Crypto.sha256(input)
+        val result = crypto.sha256WithNoSalt(input)
         
         // then
         assertNotNull(result)
@@ -111,7 +119,7 @@ class CryptoTest {
         val input = "안녕하세요 🌟 こんにちは"
         
         // when
-        val result = Crypto.sha256(input)
+        val result = crypto.sha256WithNoSalt(input)
         
         // then
         assertNotNull(result)
@@ -127,8 +135,8 @@ class CryptoTest {
         val input2 = "test"
         
         // when
-        val result1 = Crypto.sha256(input1)
-        val result2 = Crypto.sha256(input2)
+        val result1 = crypto.sha256WithNoSalt(input1)
+        val result2 = crypto.sha256WithNoSalt(input2)
         
         // then
         assertNotEquals(result1, result2)
@@ -143,9 +151,9 @@ class CryptoTest {
         val input3 = " hello world "
         
         // when
-        val result1 = Crypto.sha256(input1)
-        val result2 = Crypto.sha256(input2)
-        val result3 = Crypto.sha256(input3)
+        val result1 = crypto.sha256WithNoSalt(input1)
+        val result2 = crypto.sha256WithNoSalt(input2)
+        val result3 = crypto.sha256WithNoSalt(input3)
         
         // then
         // 모두 다른 해시값이어야 함 (공백도 해시에 영향)
@@ -162,7 +170,7 @@ class CryptoTest {
         
         inputs.forEach { input ->
             // when
-            val result = Crypto.sha256(input)
+            val result = crypto.sha256WithNoSalt(input)
             
             // then
             // Base64 URL 인코딩은 A-Z, a-z, 0-9, -, _ 만 사용 (패딩 없음)
