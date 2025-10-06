@@ -41,6 +41,7 @@ dependencies {
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-mysql'
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.79'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
