@@ -4,7 +4,7 @@ import kr.co.archan.reflect.global.exception.types.ApiErrorSpec
 import org.springframework.http.HttpStatus
 
 abstract class ApiException : ProductException {
-    private val apiErrorSpecs: List<ApiErrorSpec>
+    val apiErrorSpecs: List<ApiErrorSpec>
     abstract val httpStatus: HttpStatus
 
     // 단일 API 에러 스펙

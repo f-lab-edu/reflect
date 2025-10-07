@@ -1,8 +1,10 @@
 package kr.co.archan.reflect.global.exception.handler
 
 import jakarta.servlet.http.HttpServletRequest
+import kr.co.archan.reflect.global.exception.base.ApiException
 import kr.co.archan.reflect.global.exception.common.InvalidInputException
 import kr.co.archan.reflect.global.exception.dto.ApiErrorResponseSpec
+import kr.co.archan.reflect.global.exception.dto.BasicErrorResponse
 import kr.co.archan.reflect.global.exception.dto.InvalidFieldDetail
 import kr.co.archan.reflect.global.exception.dto.ValidationErrorResponse
 import kr.co.archan.reflect.member.exception.types.MemberInvalidInputField
@@ -15,6 +17,27 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 
 @RestControllerAdvice
 class ServiceExceptionHandler {
+
+    /**
+     * ApiException 처리
+     * RFC 9457 Problem Details 표준에 따른 응답 반환
+     */
+    @ExceptionHandler(ApiException::class)
+    fun handleApiException(
+        ex: ApiException,
+        request: HttpServletRequest
+    ): ResponseEntity<ApiErrorResponseSpec> {
+        val httpStatus = ex.httpStatus
+        
+        val problemDetail = BasicErrorResponse(
+            title = ex.apiErrorSpecs.first().systemMessage,
+            status = httpStatus.value(),
+            detail = ex.apiErrorSpecs.first().userMessage,
+            instance = request.requestURI
+        )
+        
+        return ResponseEntity(problemDetail, httpStatus)
+    }
 
     /**
      * MethodArgumentNotValidException, InvalidInputException 처리
