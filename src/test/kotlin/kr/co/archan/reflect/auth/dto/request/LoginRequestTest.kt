@@ -1,31 +1,14 @@
 package kr.co.archan.reflect.auth.dto.request
 
-import kr.co.archan.reflect.global.exception.common.InvalidInputException
-import kr.co.archan.reflect.member.exception.types.MemberInvalidInputField
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import jakarta.validation.Validation
 import jakarta.validation.Validator
 
 class LoginRequestTest {
 
     private val validator: Validator = Validation.buildDefaultValidatorFactory().validator
-
-    private fun validateOrThrow(req: LoginRequest) {
-        val violations = validator.validate(req)
-        if (violations.isNotEmpty()) {
-            val specs = violations.map { v ->
-                when (v.propertyPath.toString()) {
-                    "email" -> MemberInvalidInputField.EMAIL
-                    "password" -> MemberInvalidInputField.PASSWORD
-                    else -> MemberInvalidInputField.UNKNOWN
-                }
-            }
-            throw InvalidInputException(specs)
-        }
-    }
 
     @Test
     @DisplayName("LoginRequest 생성 성공")
@@ -50,8 +33,11 @@ class LoginRequestTest {
         // given
         val request = LoginRequest("valid@example.com", "validPass123!")
 
-        // when & then
-        assertDoesNotThrow { validateOrThrow(request) }
+        // when
+        val violations = validator.validate(request)
+
+        // then
+        assertTrue(violations.isEmpty())
     }
 
     @Test
@@ -61,11 +47,12 @@ class LoginRequestTest {
         val email = ""
         val password = "securePassword123!"
 
-        // when & then
-        val exception = assertThrows<InvalidInputException> { 
-            validateOrThrow(LoginRequest(email, password)) 
-        }
-        assertTrue(exception.specs.contains(MemberInvalidInputField.EMAIL))
+        // when
+        val violations = validator.validate(LoginRequest(email, password))
+
+        // then
+        assertTrue(violations.isNotEmpty())
+        assertTrue(violations.any { it.propertyPath.toString() == "email" })
     }
 
     @Test
@@ -75,11 +62,12 @@ class LoginRequestTest {
         val email = "invalid-email"
         val password = "securePassword123!"
 
-        // when & then
-        val exception = assertThrows<InvalidInputException> { 
-            validateOrThrow(LoginRequest(email, password)) 
-        }
-        assertTrue(exception.specs.contains(MemberInvalidInputField.EMAIL))
+        // when
+        val violations = validator.validate(LoginRequest(email, password))
+
+        // then
+        assertTrue(violations.isNotEmpty())
+        assertTrue(violations.any { it.propertyPath.toString() == "email" })
     }
 
     @Test
@@ -89,11 +77,12 @@ class LoginRequestTest {
         val email = "testasdfsdfsasdfdasasdfddasfdddudgfiausgdiufgisdugfiugasidugfiausgdfigusadftestasdfsdfsdfsdftsadfgsdgfiuagsidufgisudgfiausgdiufgisdugfiugasidugfiausgdfigusadftestasdfsdfsdfsdftsadfgsdgfiuagsidufgisudgfiausgdiufgisdugfiugasidugfiausgdfigusadfasdfdd@test.com"
         val password = "securePassword123!"
 
-        // when & then
-        val exception = assertThrows<InvalidInputException> { 
-            validateOrThrow(LoginRequest(email, password)) 
-        }
-        assertTrue(exception.specs.contains(MemberInvalidInputField.EMAIL))
+        // when
+        val violations = validator.validate(LoginRequest(email, password))
+
+        // then
+        assertTrue(violations.isNotEmpty())
+        assertTrue(violations.any { it.propertyPath.toString() == "email" })
     }
 
     @Test
@@ -103,11 +92,12 @@ class LoginRequestTest {
         val email = "test@example.com"
         val password = "pass1!"
 
-        // when & then
-        val exception = assertThrows<InvalidInputException> { 
-            validateOrThrow(LoginRequest(email, password)) 
-        }
-        assertTrue(exception.specs.contains(MemberInvalidInputField.PASSWORD))
+        // when
+        val violations = validator.validate(LoginRequest(email, password))
+
+        // then
+        assertTrue(violations.isNotEmpty())
+        assertTrue(violations.any { it.propertyPath.toString() == "password" })
     }
 
     @Test
@@ -117,11 +107,12 @@ class LoginRequestTest {
         val email = "test@example.com"
         val password = "verylongpasswordverylongpasswordverylongpasswordverylongpaslong1!"
 
-        // when & then
-        val exception = assertThrows<InvalidInputException> { 
-            validateOrThrow(LoginRequest(email, password)) 
-        }
-        assertTrue(exception.specs.contains(MemberInvalidInputField.PASSWORD))
+        // when
+        val violations = validator.validate(LoginRequest(email, password))
+
+        // then
+        assertTrue(violations.isNotEmpty())
+        assertTrue(violations.any { it.propertyPath.toString() == "password" })
     }
 
     @Test
@@ -131,11 +122,12 @@ class LoginRequestTest {
         val email = "test@example.com"
         val password = "passwordwithoutdigit!"
 
-        // when & then
-        val exception = assertThrows<InvalidInputException> { 
-            validateOrThrow(LoginRequest(email, password)) 
-        }
-        assertTrue(exception.specs.contains(MemberInvalidInputField.PASSWORD))
+        // when
+        val violations = validator.validate(LoginRequest(email, password))
+
+        // then
+        assertTrue(violations.isNotEmpty())
+        assertTrue(violations.any { it.propertyPath.toString() == "password" })
     }
 
     @Test
@@ -145,11 +137,12 @@ class LoginRequestTest {
         val email = "test@example.com"
         val password = "passwordwithoutspecial123"
 
-        // when & then
-        val exception = assertThrows<InvalidInputException> { 
-            validateOrThrow(LoginRequest(email, password)) 
-        }
-        assertTrue(exception.specs.contains(MemberInvalidInputField.PASSWORD))
+        // when
+        val violations = validator.validate(LoginRequest(email, password))
+
+        // then
+        assertTrue(violations.isNotEmpty())
+        assertTrue(violations.any { it.propertyPath.toString() == "password" })
     }
 
     @Test
