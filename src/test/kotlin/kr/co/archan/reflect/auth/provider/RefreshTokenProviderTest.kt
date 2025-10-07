@@ -2,13 +2,16 @@ package kr.co.archan.reflect.auth.provider
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
+import io.mockk.slot
+import kr.co.archan.reflect.auth.domain.RefreshToken
 import kr.co.archan.reflect.auth.properties.JwtProperties
+import kr.co.archan.reflect.auth.repository.RefreshTokenRepository
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.assertThrows
 import java.time.Instant
-import java.util.*
 import kotlin.math.abs
 
 class RefreshTokenProviderTest {
@@ -21,7 +24,11 @@ class RefreshTokenProviderTest {
             every { refreshTokenTtlSeconds } returns 604800L // 7일
         }
         
-        val refreshTokenProvider = RefreshTokenProvider(jwtProperties)
+        val refreshTokenRepository = mockk<RefreshTokenRepository>(relaxed = true)
+        val tokenSlot = slot<RefreshToken>()
+        every { refreshTokenRepository.save(capture(tokenSlot)) } returns mockk()
+        
+        val refreshTokenProvider = RefreshTokenProvider(jwtProperties, refreshTokenRepository)
         val memberId = 12345L
         val beforeCall = Instant.now()
         
@@ -49,6 +56,15 @@ class RefreshTokenProviderTest {
         val expectedExpiry = beforeCall.plusSeconds(604800L)
         val timeDifference = abs(result.expiresAt.epochSecond - expectedExpiry.epochSecond)
         assertTrue(timeDifference <= 2)
+        
+        // repository.save가 호출되었는지 검증
+        verify(exactly = 1) { refreshTokenRepository.save(any()) }
+        
+        // 저장된 토큰이 반환된 토큰과 동일한지 검증
+        val savedToken = tokenSlot.captured
+        assertEquals(result.value, savedToken.value)
+        assertEquals(result.memberId, savedToken.memberId)
+        assertEquals(result.expiresAt, savedToken.expiresAt)
     }
 
     @Test
@@ -59,7 +75,10 @@ class RefreshTokenProviderTest {
             every { refreshTokenTtlSeconds } returns 604800L
         }
         
-        val refreshTokenProvider = RefreshTokenProvider(jwtProperties)
+        val refreshTokenRepository = mockk<RefreshTokenRepository>(relaxed = true)
+        every { refreshTokenRepository.save(any()) } returns mockk()
+        
+        val refreshTokenProvider = RefreshTokenProvider(jwtProperties, refreshTokenRepository)
         val memberId = 12345L
         
         // when
@@ -79,6 +98,9 @@ class RefreshTokenProviderTest {
         assertFalse(token2.value.contains('='))
         assertTrue(token1.value.matches(Regex("^[A-Za-z0-9_-]+$")))
         assertTrue(token2.value.matches(Regex("^[A-Za-z0-9_-]+$")))
+        
+        // repository.save가 2번 호출되었는지 검증
+        verify(exactly = 2) { refreshTokenRepository.save(any()) }
     }
 
     @Test
@@ -89,7 +111,10 @@ class RefreshTokenProviderTest {
             every { refreshTokenTtlSeconds } returns 604800L
         }
         
-        val refreshTokenProvider = RefreshTokenProvider(jwtProperties)
+        val refreshTokenRepository = mockk<RefreshTokenRepository>(relaxed = true)
+        every { refreshTokenRepository.save(any()) } returns mockk()
+        
+        val refreshTokenProvider = RefreshTokenProvider(jwtProperties, refreshTokenRepository)
         val memberId1 = 12345L
         val memberId2 = 67890L
         
@@ -108,6 +133,9 @@ class RefreshTokenProviderTest {
         // 만료시간은 비슷해야 함 (거의 동시에 생성되었으므로)
         val timeDifference = abs(token1.expiresAt.epochSecond - token2.expiresAt.epochSecond)
         assertTrue(timeDifference <= 1)
+        
+        // repository.save가 2번 호출되었는지 검증
+        verify(exactly = 2) { refreshTokenRepository.save(any()) }
     }
 
     @Test
@@ -118,12 +146,17 @@ class RefreshTokenProviderTest {
             every { refreshTokenTtlSeconds } returns Long.MAX_VALUE // ← 오버플로우 유발
         }
         
-        val refreshTokenProvider = RefreshTokenProvider(jwtProperties)
+        val refreshTokenRepository = mockk<RefreshTokenRepository>(relaxed = true)
+        
+        val refreshTokenProvider = RefreshTokenProvider(jwtProperties, refreshTokenRepository)
         val memberId = 12345L
         
         // when & then
         assertThrows<ArithmeticException> {
             refreshTokenProvider.provideRefreshToken(memberId)
         }
+        
+        // 오버플로우로 인해 save가 호출되지 않았는지 검증
+        verify(exactly = 0) { refreshTokenRepository.save(any()) }
     }
 }
