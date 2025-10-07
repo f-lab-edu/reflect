@@ -1,18 +1,29 @@
 package kr.co.archan.reflect.global.util
 
+import kr.co.archan.reflect.global.properties.CryptoProperties
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 import java.util.*
 
 class CryptoTest {
 
     private lateinit var crypto: Crypto
+    private lateinit var passwordEncoder: PasswordEncoder
+    private val testPepperKey = "test-pepper-key"
 
     @BeforeEach
     fun setUp() {
-        crypto = Crypto("test-secret-key")
+        val cryptoProperties = CryptoProperties(
+            hashKey = "test-secret-key",
+            pepperKey = testPepperKey
+        )
+        // 실제 Argon2PasswordEncoder 인스턴스 사용
+        passwordEncoder = Argon2PasswordEncoder(16, 32, 1, 64 * 1024, 3)
+        crypto = Crypto(cryptoProperties, passwordEncoder)
     }
 
     @Test
@@ -181,4 +192,138 @@ class CryptoTest {
             assertEquals(43, result.length, "Input: $input should produce 43 character hash")
         }
     }
+
+    @Test
+    @DisplayName("hashPassword - 비밀번호 해싱이 정상 작동")
+    fun `hashPassword - 비밀번호 해싱이 정상 작동`() {
+        // given
+        val password = "myPassword123"
+        
+        // when
+        val result = crypto.hashPassword(password)
+        
+        // then
+        assertNotNull(result)
+        assertFalse(result.isEmpty())
+        // Argon2 해시는 $argon2로 시작
+        assertTrue(result.startsWith("\$argon2"))
+    }
+
+    @Test
+    @DisplayName("hashPassword - 동일한 비밀번호도 매번 다른 해시 생성 (salt 때문)")
+    fun `hashPassword - 동일한 비밀번호도 매번 다른 해시 생성 (salt 때문)`() {
+        // given
+        val password = "samePassword"
+        
+        // when
+        val hash1 = crypto.hashPassword(password)
+        val hash2 = crypto.hashPassword(password)
+        
+        // then
+        assertNotEquals(hash1, hash2) // salt가 매번 달라서 해시도 다름
+    }
+
+    @Test
+    @DisplayName("isPasswordMatches - 올바른 비밀번호는 true 반환")
+    fun `isPasswordMatches - 올바른 비밀번호는 true 반환`() {
+        // given
+        val password = "correctPassword"
+        val hashedPassword = crypto.hashPassword(password)
+        
+        // when
+        val result = crypto.isPasswordMatches(hashedPassword, password)
+        
+        // then
+        assertTrue(result)
+    }
+
+    @Test
+    @DisplayName("isPasswordMatches - 잘못된 비밀번호는 false 반환")
+    fun `isPasswordMatches - 잘못된 비밀번호는 false 반환`() {
+        // given
+        val password = "correctPassword"
+        val wrongPassword = "wrongPassword"
+        val hashedPassword = crypto.hashPassword(password)
+        
+        // when
+        val result = crypto.isPasswordMatches(hashedPassword, wrongPassword)
+        
+        // then
+        assertFalse(result)
+    }
+
+    @Test
+    @DisplayName("isPasswordMatches - 대소문자 구분 검증")
+    fun `isPasswordMatches - 대소문자 구분 검증`() {
+        // given
+        val password = "Password"
+        val hashedPassword = crypto.hashPassword(password)
+        
+        // when
+        val correctResult = crypto.isPasswordMatches(hashedPassword, "Password")
+        val wrongResult = crypto.isPasswordMatches(hashedPassword, "password")
+        
+        // then
+        assertTrue(correctResult)
+        assertFalse(wrongResult)
+    }
+
+    @Test
+    @DisplayName("isPasswordMatches - 특수문자 포함 비밀번호 검증")
+    fun `isPasswordMatches - 특수문자 포함 비밀번호 검증`() {
+        // given
+        val password = "P@ssw0rd!#$%^&*()"
+        val hashedPassword = crypto.hashPassword(password)
+        
+        // when
+        val result = crypto.isPasswordMatches(hashedPassword, password)
+        
+        // then
+        assertTrue(result)
+    }
+
+    @Test
+    @DisplayName("isPasswordMatches - 빈 비밀번호 검증")
+    fun `isPasswordMatches - 빈 비밀번호 검증`() {
+        // given
+        val password = ""
+        val hashedPassword = crypto.hashPassword(password)
+        
+        // when
+        val result = crypto.isPasswordMatches(hashedPassword, password)
+        
+        // then
+        assertTrue(result)
+    }
+
+    @Test
+    @DisplayName("isPasswordMatches - 긴 비밀번호 검증")
+    fun `isPasswordMatches - 긴 비밀번호 검증`() {
+        // given
+        val password = "a".repeat(100) // 100자 비밀번호
+        val hashedPassword = crypto.hashPassword(password)
+        
+        // when
+        val correctResult = crypto.isPasswordMatches(hashedPassword, password)
+        val wrongResult = crypto.isPasswordMatches(hashedPassword, "a".repeat(99))
+        
+        // then
+        assertTrue(correctResult)
+        assertFalse(wrongResult)
+    }
+
+    @Test
+    @DisplayName("isPasswordMatches - 유니코드 문자 포함 비밀번호 검증")
+    fun `isPasswordMatches - 유니코드 문자 포함 비밀번호 검증`() {
+        // given
+        val password = "비밀번호123!@#"
+        val hashedPassword = crypto.hashPassword(password)
+        
+        // when
+        val result = crypto.isPasswordMatches(hashedPassword, password)
+        
+        // then
+        assertTrue(result)
+    }
+
 }
