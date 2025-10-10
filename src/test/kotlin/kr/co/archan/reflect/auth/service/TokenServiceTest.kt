@@ -8,12 +8,15 @@ import kr.co.archan.reflect.auth.properties.JwtProperties
 import kr.co.archan.reflect.auth.provider.AccessTokenProvider
 import kr.co.archan.reflect.auth.provider.RefreshTokenProvider
 import kr.co.archan.reflect.auth.repository.RefreshTokenRepository
+import kr.co.archan.reflect.global.properties.CryptoProperties
+import kr.co.archan.reflect.global.util.Crypto
 import kr.co.archan.reflect.member.domain.Member
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.assertThrows
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 import java.time.Instant
 import kotlin.math.abs
 
@@ -24,6 +27,9 @@ class TokenServiceTest {
     private lateinit var refreshTokenProvider: RefreshTokenProvider
     private lateinit var jwtProperties: JwtProperties
     private lateinit var refreshTokenRepository: RefreshTokenRepository
+    private lateinit var crypto: Crypto
+    private lateinit var passwordEncoder: PasswordEncoder
+    private val testPepperKey = "test-pepper-key"
 
     @BeforeEach
     fun setUp() {
@@ -35,6 +41,14 @@ class TokenServiceTest {
             every { accessTokenTtlSeconds } returns 3600L
             every { refreshTokenTtlSeconds } returns 1209600L
         }
+
+        val cryptoProperties = CryptoProperties(
+            hashKey = "test-secret-key",
+            pepperKey = testPepperKey
+        )
+        // 실제 Argon2PasswordEncoder 인스턴스 사용
+        passwordEncoder = Argon2PasswordEncoder(16, 32, 1, 64 * 1024, 3)
+        crypto = Crypto(cryptoProperties, passwordEncoder)
         
         // Repository 모킹
         refreshTokenRepository = mockk(relaxed = true)
@@ -48,18 +62,18 @@ class TokenServiceTest {
     }
 
     @Test
-    @DisplayName("issueOnLogin - 로그인 시 AccessToken과 RefreshToken 발급")
-    fun `issueOnLogin - 로그인 시 AccessToken과 RefreshToken 발급`() {
+    @DisplayName("issueToken - 로그인 시 AccessToken과 RefreshToken 발급")
+    fun `issueToken - 로그인 시 AccessToken과 RefreshToken 발급`() {
         // given
         val member = Member.signUp(
             email = "test@example.com",
-            password = "hashedPassword",
+            hashedPassword = crypto.hashPassword("hashedPassword"),
             name = "홍길동"
         )
         val beforeCall = Instant.now()
 
         // when
-        val result = tokenService.issueOnLogin(member)
+        val result = tokenService.issueToken(member)
         val afterCall = Instant.now()
 
         // then
@@ -100,15 +114,15 @@ class TokenServiceTest {
     }
 
     @Test
-    @DisplayName("issueOnLogin - 서로 다른 이메일을 가진 회원에게 다른 토큰 발급")
-    fun `issueOnLogin - 서로 다른 이메일을 가진 회원에게 다른 토큰 발급`() {
+    @DisplayName("issueToken - 서로 다른 이메일을 가진 회원에게 다른 토큰 발급")
+    fun `issueToken - 서로 다른 이메일을 가진 회원에게 다른 토큰 발급`() {
         // given
-        val member1 = Member.signUp("user1@example.com", "password1", "사용자1")
-        val member2 = Member.signUp("user2@example.com", "password2", "사용자2")
+        val member1 = Member.signUp("user1@example.com", crypto.hashPassword("password1"), "사용자1")
+        val member2 = Member.signUp("user2@example.com", crypto.hashPassword("password2"), "사용자2")
 
         // when
-        val result1 = tokenService.issueOnLogin(member1)
-        val result2 = tokenService.issueOnLogin(member2)
+        val result1 = tokenService.issueToken(member1)
+        val result2 = tokenService.issueToken(member2)
 
         // then
         // AccessToken이 서로 다름 (JWT 내용이 다르므로)
@@ -128,17 +142,17 @@ class TokenServiceTest {
     }
 
     @Test
-    @DisplayName("issueOnLogin - JWT에 올바른 claim이 포함됨")
-    fun `issueOnLogin - JWT에 올바른 claim이 포함됨`() {
+    @DisplayName("issueToken - JWT에 올바른 claim이 포함됨")
+    fun `issueToken - JWT에 올바른 claim이 포함됨`() {
         // given
         val member = Member.signUp(
             email = "verify@example.com",
-            password = "password",
+            hashedPassword = crypto.hashPassword("password"),
             name = "검증테스트"
         )
 
         // when
-        val result = tokenService.issueOnLogin(member)
+        val result = tokenService.issueToken(member)
 
         // then
         val jwt = SignedJWT.parse(result.accessToken.value)
@@ -156,13 +170,13 @@ class TokenServiceTest {
     }
 
     @Test
-    @DisplayName("issueOnLogin - RefreshToken이 Repository에 저장됨")
-    fun `issueOnLogin - RefreshToken이 Repository에 저장됨`() {
+    @DisplayName("issueToken - RefreshToken이 Repository에 저장됨")
+    fun `issueToken - RefreshToken이 Repository에 저장됨`() {
         // given
-        val member = Member.signUp("test@example.com", "password", "테스트")
+        val member = Member.signUp("test@example.com", crypto.hashPassword("password"), "테스트")
 
         // when
-        val result = tokenService.issueOnLogin(member)
+        val result = tokenService.issueToken(member)
 
         // then
         assertNotNull(result.refreshToken)
@@ -176,15 +190,15 @@ class TokenServiceTest {
     }
 
     @Test
-    @DisplayName("issueOnLogin - 같은 회원이 여러 번 로그인하면 매번 다른 토큰 발급")
-    fun `issueOnLogin - 같은 회원이 여러 번 로그인하면 매번 다른 토큰 발급`() {
+    @DisplayName("issueToken - 같은 회원이 여러 번 로그인하면 매번 다른 토큰 발급")
+    fun `issueToken - 같은 회원이 여러 번 로그인하면 매번 다른 토큰 발급`() {
         // given
-        val member = Member.signUp("repeat@example.com", "password", "반복테스트")
+        val member = Member.signUp("repeat@example.com", crypto.hashPassword("password"), "반복테스트")
 
         // when
-        val result1 = tokenService.issueOnLogin(member)
-        val result2 = tokenService.issueOnLogin(member)
-        val result3 = tokenService.issueOnLogin(member)
+        val result1 = tokenService.issueToken(member)
+        val result2 = tokenService.issueToken(member)
+        val result3 = tokenService.issueToken(member)
 
         // then
         // 모든 토큰이 서로 다름
@@ -201,14 +215,14 @@ class TokenServiceTest {
     }
 
     @Test
-    @DisplayName("issueOnLogin - 토큰 만료 시간이 올바르게 설정됨")
-    fun `issueOnLogin - 토큰 만료 시간이 Properties 설정에 따라 올바르게 설정됨`() {
+    @DisplayName("issueToken - 토큰 만료 시간이 올바르게 설정됨")
+    fun `issueToken - 토큰 만료 시간이 Properties 설정에 따라 올바르게 설정됨`() {
         // given
-        val member = Member.signUp("expiry@example.com", "password", "만료테스트")
+        val member = Member.signUp("expiry@example.com", crypto.hashPassword("password"), "만료테스트")
         val now = Instant.now()
 
         // when
-        val result = tokenService.issueOnLogin(member)
+        val result = tokenService.issueToken(member)
 
         // then
         // AccessToken은 약 1시간 후 만료 (3600초)

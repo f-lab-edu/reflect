@@ -204,9 +204,9 @@ class CryptoTest {
         
         // then
         assertNotNull(result)
-        assertFalse(result.isEmpty())
+        assertFalse(result.value.isEmpty())
         // Argon2 해시는 $argon2로 시작
-        assertTrue(result.startsWith("\$argon2"))
+        assertTrue(result.value.startsWith("\$argon2"))
     }
 
     @Test
@@ -231,7 +231,7 @@ class CryptoTest {
         val hashedPassword = crypto.hashPassword(password)
         
         // when
-        val result = crypto.isPasswordMatches(hashedPassword, password)
+        val result = crypto.isPasswordMatches(hashedPassword.value, password)
         
         // then
         assertTrue(result)
@@ -246,7 +246,7 @@ class CryptoTest {
         val hashedPassword = crypto.hashPassword(password)
         
         // when
-        val result = crypto.isPasswordMatches(hashedPassword, wrongPassword)
+        val result = crypto.isPasswordMatches(hashedPassword.value, wrongPassword)
         
         // then
         assertFalse(result)
@@ -260,8 +260,8 @@ class CryptoTest {
         val hashedPassword = crypto.hashPassword(password)
         
         // when
-        val correctResult = crypto.isPasswordMatches(hashedPassword, "Password")
-        val wrongResult = crypto.isPasswordMatches(hashedPassword, "password")
+        val correctResult = crypto.isPasswordMatches(hashedPassword.value, "Password")
+        val wrongResult = crypto.isPasswordMatches(hashedPassword.value, "password")
         
         // then
         assertTrue(correctResult)
@@ -276,7 +276,7 @@ class CryptoTest {
         val hashedPassword = crypto.hashPassword(password)
         
         // when
-        val result = crypto.isPasswordMatches(hashedPassword, password)
+        val result = crypto.isPasswordMatches(hashedPassword.value, password)
         
         // then
         assertTrue(result)
@@ -290,7 +290,7 @@ class CryptoTest {
         val hashedPassword = crypto.hashPassword(password)
         
         // when
-        val result = crypto.isPasswordMatches(hashedPassword, password)
+        val result = crypto.isPasswordMatches(hashedPassword.value, password)
         
         // then
         assertTrue(result)
@@ -304,8 +304,8 @@ class CryptoTest {
         val hashedPassword = crypto.hashPassword(password)
         
         // when
-        val correctResult = crypto.isPasswordMatches(hashedPassword, password)
-        val wrongResult = crypto.isPasswordMatches(hashedPassword, "a".repeat(99))
+        val correctResult = crypto.isPasswordMatches(hashedPassword.value, password)
+        val wrongResult = crypto.isPasswordMatches(hashedPassword.value, "a".repeat(99))
         
         // then
         assertTrue(correctResult)
@@ -320,7 +320,7 @@ class CryptoTest {
         val hashedPassword = crypto.hashPassword(password)
         
         // when
-        val result = crypto.isPasswordMatches(hashedPassword, password)
+        val result = crypto.isPasswordMatches(hashedPassword.value, password)
         
         // then
         assertTrue(result)

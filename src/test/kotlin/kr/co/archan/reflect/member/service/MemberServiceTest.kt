@@ -3,6 +3,8 @@ package kr.co.archan.reflect.member.service
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kr.co.archan.reflect.global.properties.CryptoProperties
+import kr.co.archan.reflect.global.util.Crypto
 import kr.co.archan.reflect.member.domain.Member
 import kr.co.archan.reflect.member.exception.common.MemberNotFoundException
 import kr.co.archan.reflect.member.repository.MemberRepository
@@ -11,16 +13,29 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.BeforeEach
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 
 class MemberServiceTest {
 
     private lateinit var memberService: MemberService
     private lateinit var memberRepository: MemberRepository
+    private lateinit var crypto: Crypto
+    private lateinit var passwordEncoder: PasswordEncoder
+    private val testPepperKey = "test-pepper-key"
 
     @BeforeEach
     fun setUp() {
         memberRepository = mockk()
         memberService = MemberService(memberRepository)
+
+        val cryptoProperties = CryptoProperties(
+            hashKey = "test-secret-key",
+            pepperKey = testPepperKey
+        )
+        // 실제 Argon2PasswordEncoder 인스턴스 사용
+        passwordEncoder = Argon2PasswordEncoder(16, 32, 1, 64 * 1024, 3)
+        crypto = Crypto(cryptoProperties, passwordEncoder)
     }
 
     @Test
@@ -30,7 +45,7 @@ class MemberServiceTest {
         val email = "test@example.com"
         val expectedMember = Member.signUp(
             email = email,
-            password = "hashedPassword123",
+            hashedPassword = crypto.hashPassword("hashedPassword123"),
             name = "홍길동"
         )
         every { memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns expectedMember
@@ -70,8 +85,8 @@ class MemberServiceTest {
         val lowerEmail = "user@example.com"
         val upperEmail = "USER@EXAMPLE.COM"
         
-        val lowerMember = Member.signUp(lowerEmail, "password1", "소문자")
-        val upperMember = Member.signUp(upperEmail, "password2", "대문자")
+        val lowerMember = Member.signUp(lowerEmail, crypto.hashPassword("password1"), "소문자")
+        val upperMember = Member.signUp(upperEmail, crypto.hashPassword("password1"), "대문자")
         
         every { memberRepository.findByEmailAndIsWithdrawnFalse(lowerEmail) } returns lowerMember
         every { memberRepository.findByEmailAndIsWithdrawnFalse(upperEmail) } returns upperMember
