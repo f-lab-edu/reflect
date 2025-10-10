@@ -2,6 +2,7 @@ package kr.co.archan.reflect.auth.service
 
 import kr.co.archan.reflect.auth.dto.vo.AuthToken
 import kr.co.archan.reflect.auth.exception.common.WrongPasswordException
+import kr.co.archan.reflect.global.annotation.DistributedLock
 import kr.co.archan.reflect.global.util.Crypto
 import kr.co.archan.reflect.member.domain.Member
 import kr.co.archan.reflect.member.service.MemberService
@@ -22,6 +23,10 @@ class AuthService (
         return tokenService.issueToken(member)
     }
 
+    @DistributedLock(
+        key = "#email",
+        prefix = "auth:signup"
+    )
     @Transactional
     fun signUpMember(email: String, password: String, name: String): AuthToken {
         val hashedPassword = crypto.hashPassword(password)
