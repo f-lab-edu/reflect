@@ -6,6 +6,7 @@ import io.mockk.verify
 import kr.co.archan.reflect.global.properties.CryptoProperties
 import kr.co.archan.reflect.global.util.Crypto
 import kr.co.archan.reflect.member.domain.Member
+import kr.co.archan.reflect.member.exception.common.MemberAlreadyExistsException
 import kr.co.archan.reflect.member.exception.common.MemberNotFoundException
 import kr.co.archan.reflect.member.repository.MemberRepository
 import kr.co.archan.reflect.member.service.MemberService
@@ -115,5 +116,39 @@ class MemberServiceTest {
         }
 
         verify(exactly = 1) { memberRepository.findByEmailAndIsWithdrawnFalse(email) }
+    }
+
+    @Test
+    @DisplayName("saveNewMember - 새로운 회원 정상 저장")
+    fun `saveMember - 새로운 회원 정상 저장`() {
+        //given
+        val email = "abc@gmail.com"
+        val password = "abcdefg1!"
+        val name = "abcd"
+        val member = Member.signUp(email, crypto.hashPassword(password), name)
+        every { memberRepository.save(any()) } returns member
+        every { memberRepository.existsByEmailAndIsWithdrawnFalse(email) } returns false
+
+        //when
+        val savedMember = memberService.saveNewMember(member)
+
+        //then
+        assertEquals(member.email, savedMember.email)
+        assertEquals(member.name, savedMember.name)
+    }
+
+    @Test
+    @DisplayName("saveNewMember - 중복 회원 예외")
+    fun `saveNewMember - 중복 회원 예외`() {
+        val email = "abc@gmail.com"
+        val password = "abcdefg1!"
+        val name = "abcd"
+        val member = Member.signUp(email, crypto.hashPassword(password), name)
+        every { memberRepository.existsByEmailAndIsWithdrawnFalse(email) } returns true
+
+        //when
+        assertThrows<MemberAlreadyExistsException> {
+            memberService.saveNewMember(member)
+        }
     }
 }
