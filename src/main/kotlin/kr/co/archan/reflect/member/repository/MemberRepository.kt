@@ -5,4 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface MemberRepository : JpaRepository<Member, Long> {
     fun findByEmailAndIsWithdrawnFalse(email: String): Member?
+    fun existsByEmailAndIsWithdrawnFalse(email: String) : Boolean
 }
