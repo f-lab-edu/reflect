@@ -221,12 +221,13 @@ class AuthServiceTest {
     fun `signup - 정상적인 회원가입`() {
         //given
         val email = "abc@gmail.com"
-        val password = "abcdefg"
+        val password = "abcdefg1!"
         val name = "abcd"
 
         val hashedPassword = crypto.hashPassword(password)
 
-        every {memberRepository.save(any())} returns Member.signUp(email, hashedPassword, name)
+        every { memberRepository.save(any()) } returns Member.signUp(email, hashedPassword, name)
+        every { memberRepository.existsByEmailAndIsWithdrawnFalse(any()) } returns false
 
         //when
         val result = authService.signUpMember(email, password, name)
