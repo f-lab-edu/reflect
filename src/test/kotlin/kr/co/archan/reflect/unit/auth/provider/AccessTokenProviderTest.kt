@@ -1,9 +1,10 @@
-package kr.co.archan.reflect.auth.provider
+package kr.co.archan.reflect.unit.auth.provider
 
 import com.nimbusds.jwt.SignedJWT
 import io.mockk.every
 import io.mockk.mockk
 import kr.co.archan.reflect.auth.properties.JwtProperties
+import kr.co.archan.reflect.auth.provider.AccessTokenProvider
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Assertions.*

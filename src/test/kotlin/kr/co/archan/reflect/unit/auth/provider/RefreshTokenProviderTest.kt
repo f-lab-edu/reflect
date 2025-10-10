@@ -1,4 +1,4 @@
-package kr.co.archan.reflect.auth.provider
+package kr.co.archan.reflect.unit.auth.provider
 
 import io.mockk.every
 import io.mockk.mockk
@@ -6,6 +6,7 @@ import io.mockk.verify
 import io.mockk.slot
 import kr.co.archan.reflect.auth.domain.RefreshToken
 import kr.co.archan.reflect.auth.properties.JwtProperties
+import kr.co.archan.reflect.auth.provider.RefreshTokenProvider
 import kr.co.archan.reflect.auth.repository.RefreshTokenRepository
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName

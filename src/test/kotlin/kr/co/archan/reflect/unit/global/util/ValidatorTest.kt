@@ -1,5 +1,6 @@
-package kr.co.archan.reflect.global.util
+package kr.co.archan.reflect.unit.global.util
 
+import kr.co.archan.reflect.global.util.Validator
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test

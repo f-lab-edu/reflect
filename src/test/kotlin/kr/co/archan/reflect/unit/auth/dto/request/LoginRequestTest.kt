@@ -1,10 +1,11 @@
-package kr.co.archan.reflect.auth.dto.request
+package kr.co.archan.reflect.unit.auth.dto.request
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import jakarta.validation.Validation
 import jakarta.validation.Validator
+import kr.co.archan.reflect.auth.dto.request.LoginRequest
 
 class LoginRequestTest {
 

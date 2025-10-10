@@ -1,7 +1,8 @@
-package kr.co.archan.reflect.member.domain
+package kr.co.archan.reflect.unit.member.domain
 
 import kr.co.archan.reflect.global.properties.CryptoProperties
 import kr.co.archan.reflect.global.util.Crypto
+import kr.co.archan.reflect.member.domain.Member
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName

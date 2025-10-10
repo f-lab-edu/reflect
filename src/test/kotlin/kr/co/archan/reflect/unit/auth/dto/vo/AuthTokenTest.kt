@@ -1,7 +1,8 @@
-package kr.co.archan.reflect.auth.dto.vo
+package kr.co.archan.reflect.unit.auth.dto.vo
 
 import kr.co.archan.reflect.auth.domain.AccessToken
 import kr.co.archan.reflect.auth.domain.RefreshToken
+import kr.co.archan.reflect.auth.dto.vo.AuthToken
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Assertions.*

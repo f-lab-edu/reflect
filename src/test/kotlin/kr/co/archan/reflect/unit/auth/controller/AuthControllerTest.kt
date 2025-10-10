@@ -1,8 +1,9 @@
-package kr.co.archan.reflect.auth.controller
+package kr.co.archan.reflect.unit.auth.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.every
 import io.mockk.mockk
+import kr.co.archan.reflect.auth.controller.AuthController
 import kr.co.archan.reflect.auth.dto.request.LoginRequest
 import kr.co.archan.reflect.auth.dto.request.SignUpRequest
 import kr.co.archan.reflect.auth.properties.JwtProperties
@@ -209,16 +210,68 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("POST /auth/signup - 중복 회원가입 동시성 문제 방지")
-    fun `POST auth signup - 중복 회원가입 동시성 문제 방지`() {
-        //given
-        val email = "abc@gmail.com"
-        val password = "abcdefg1!"
-        val name = "abcd"
-
+    @DisplayName("POST /auth/signup - 이미 존재하는 이메일로 회원가입 시 실패")
+    fun `POST auth signup - 이미 존재하는 이메일로 회원가입 시 실패`() {
+        // given
+        val email = "existing@example.com"
+        val password = "password123!"
+        val name = "홍길동"
+        
+        every { memberRepository.existsByEmailAndIsWithdrawnFalse(email) } returns true
+        
         val request = SignUpRequest(email, password, name)
 
-        
+        // when & then
+        mockMvc.perform(
+            post("/auth/signup")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        )
+            .andExpect(status().is4xxClientError)
     }
 
+    @Test
+    @DisplayName("POST /auth/signup - 빈 이메일로 요청 시 검증 실패")
+    fun `POST auth signup - 빈 이메일로 요청 시 검증 실패`() {
+        // given
+        val request = SignUpRequest("", "password123!", "홍길동")
+
+        // when & then
+        mockMvc.perform(
+            post("/auth/signup")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        )
+            .andExpect(status().is4xxClientError)
+    }
+
+    @Test
+    @DisplayName("POST /auth/signup - 빈 비밀번호로 요청 시 검증 실패")
+    fun `POST auth signup - 빈 비밀번호로 요청 시 검증 실패`() {
+        // given
+        val request = SignUpRequest("user@example.com", "", "홍길동")
+
+        // when & then
+        mockMvc.perform(
+            post("/auth/signup")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        )
+            .andExpect(status().is4xxClientError)
+    }
+
+    @Test
+    @DisplayName("POST /auth/signup - 빈 이름으로 요청 시 검증 실패")
+    fun `POST auth signup - 빈 이름으로 요청 시 검증 실패`() {
+        // given
+        val request = SignUpRequest("user@example.com", "password123!", "")
+
+        // when & then
+        mockMvc.perform(
+            post("/auth/signup")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        )
+            .andExpect(status().is4xxClientError)
+    }
 }

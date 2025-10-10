@@ -1,4 +1,4 @@
-package kr.co.archan.reflect.member.service
+package kr.co.archan.reflect.unit.member.service
 
 import io.mockk.every
 import io.mockk.mockk
@@ -8,6 +8,7 @@ import kr.co.archan.reflect.global.util.Crypto
 import kr.co.archan.reflect.member.domain.Member
 import kr.co.archan.reflect.member.exception.common.MemberNotFoundException
 import kr.co.archan.reflect.member.repository.MemberRepository
+import kr.co.archan.reflect.member.service.MemberService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Assertions.*

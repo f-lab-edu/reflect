@@ -1,6 +1,7 @@
-package kr.co.archan.reflect.global.util
+package kr.co.archan.reflect.unit.global.util
 
 import kr.co.archan.reflect.global.properties.CryptoProperties
+import kr.co.archan.reflect.global.util.Crypto
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Assertions.*

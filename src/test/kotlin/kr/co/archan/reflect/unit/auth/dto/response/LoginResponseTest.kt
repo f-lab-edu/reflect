@@ -1,5 +1,6 @@
-package kr.co.archan.reflect.auth.dto.response
+package kr.co.archan.reflect.unit.auth.dto.response
 
+import kr.co.archan.reflect.auth.dto.response.LoginResponse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Assertions.*

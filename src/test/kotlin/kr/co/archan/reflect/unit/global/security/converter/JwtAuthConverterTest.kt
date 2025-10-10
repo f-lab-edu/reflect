@@ -1,10 +1,11 @@
-package kr.co.archan.reflect.global.security.converter
+package kr.co.archan.reflect.unit.global.security.converter
 
 import io.mockk.every
 import io.mockk.mockk
 import kr.co.archan.reflect.auth.domain.MemberPrincipal
 import kr.co.archan.reflect.auth.exception.common.JwtClaimFormatException
 import kr.co.archan.reflect.auth.exception.common.JwtRequiredClaimMissingException
+import kr.co.archan.reflect.global.security.converter.JwtAuthConverter
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Assertions.*

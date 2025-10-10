@@ -1,4 +1,4 @@
-package kr.co.archan.reflect.auth.service
+package kr.co.archan.reflect.unit.auth.service
 
 import com.nimbusds.jwt.SignedJWT
 import io.mockk.every
@@ -9,9 +9,12 @@ import kr.co.archan.reflect.auth.properties.JwtProperties
 import kr.co.archan.reflect.auth.provider.AccessTokenProvider
 import kr.co.archan.reflect.auth.provider.RefreshTokenProvider
 import kr.co.archan.reflect.auth.repository.RefreshTokenRepository
+import kr.co.archan.reflect.auth.service.AuthService
+import kr.co.archan.reflect.auth.service.TokenService
 import kr.co.archan.reflect.global.properties.CryptoProperties
 import kr.co.archan.reflect.global.util.Crypto
 import kr.co.archan.reflect.member.domain.Member
+import kr.co.archan.reflect.member.exception.common.MemberAlreadyExistsException
 import kr.co.archan.reflect.member.exception.common.MemberNotFoundException
 import kr.co.archan.reflect.member.repository.MemberRepository
 import kr.co.archan.reflect.member.service.MemberService
@@ -244,5 +247,24 @@ class AuthServiceTest {
         // Repository 호출 검증
         verify(exactly = 1) { memberRepository.save(any()) }
         verify(exactly = 1) { refreshTokenRepository.save(any()) }
+    }
+
+    @Test
+    @DisplayName("signup - 중복 회원가입 실패")
+    fun `signup - 중복 회원가입 실패`() {
+        //given
+        val email = "abc@gmail.com"
+        val password = "abcdefg1!"
+        val name = "abcd"
+
+        val hashedPassword = crypto.hashPassword(password)
+
+        every { memberRepository.save(any()) } returns Member.signUp(email, hashedPassword, name)
+        every { memberRepository.existsByEmailAndIsWithdrawnFalse(any()) } returns true
+
+        //when & then
+        assertThrows<MemberAlreadyExistsException> {
+            authService.signUpMember(email, password, name)
+        }
     }
 }
