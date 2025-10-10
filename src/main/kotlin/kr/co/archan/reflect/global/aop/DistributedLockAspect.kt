@@ -23,9 +23,11 @@ class DistributedLockAspect(
     private val keyEvaluator: LockKeyEvaluator
 ) {
 
-    @Around("@annotation(distributedLock)")
-    fun around(pjp: ProceedingJoinPoint, distributedLock: DistributedLock): Any? {
+    @Around("@annotation(kr.co.archan.reflect.global.annotation.DistributedLock)")
+    fun around(pjp: ProceedingJoinPoint): Any? {
         val method = (pjp.signature as MethodSignature).method
+        val distributedLock = method.getAnnotation(DistributedLock::class.java)
+            ?: throw IllegalStateException("DistributedLock annotation not found")
         val args = pjp.args
 
         // 1) 키 생성
