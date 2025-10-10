@@ -7,6 +7,8 @@ import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kr.co.archan.reflect.global.properties.CryptoProperties
+import kr.co.archan.reflect.global.util.Crypto
 import kr.co.archan.reflect.member.domain.Member
 import kr.co.archan.reflect.member.exception.common.MemberException
 import kr.co.archan.reflect.member.exception.types.MemberErrorCode

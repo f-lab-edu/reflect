@@ -1,6 +1,7 @@
 package kr.co.archan.reflect.global.util
 
 import kr.co.archan.reflect.global.properties.CryptoProperties
+import kr.co.archan.reflect.member.dto.vo.HashedPassword
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Component
 import java.util.*
@@ -19,8 +20,8 @@ class Crypto(
         return Base64.getUrlEncoder().withoutPadding().encodeToString(mac.doFinal(s.toByteArray()))
     }
 
-    fun hashPassword(password: String): String {
-        return passwordEncoder.encode(password + cryptoProperties.pepperKey)
+    fun hashPassword(password: String): HashedPassword {
+        return HashedPassword(value = passwordEncoder.encode(password + cryptoProperties.pepperKey))
     }
 
     fun isPasswordMatches(storedHash: String, inputPassword: String): Boolean {

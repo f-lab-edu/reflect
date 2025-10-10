@@ -12,6 +12,8 @@ import kr.co.archan.reflect.auth.properties.JwtProperties
 import kr.co.archan.reflect.auth.provider.AccessTokenProvider
 import kr.co.archan.reflect.auth.provider.RefreshTokenProvider
 import kr.co.archan.reflect.auth.repository.RefreshTokenRepository
+import kr.co.archan.reflect.global.properties.CryptoProperties
+import kr.co.archan.reflect.global.util.Crypto
 import kr.co.archan.reflect.member.domain.Member
 import java.time.Instant
 import kotlin.math.abs
