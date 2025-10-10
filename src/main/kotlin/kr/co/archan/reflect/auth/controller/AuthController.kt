@@ -26,7 +26,7 @@ class AuthController (
 
     @PostMapping("/signup")
     fun signup(@Valid @RequestBody request: SignUpRequest) : ResponseEntity<SignUpResponse> {
-        val result = authService.signUpMember(request.email, request.name, request.password)
+        val result = authService.signUpMember(request.email, request.password, request.name)
         return ResponseEntity.status(HttpStatus.CREATED).body(SignUpResponse(accessToken = result.accessToken.value, refreshToken = result.refreshToken.value))
     }
 }
