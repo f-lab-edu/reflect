@@ -1,4 +1,4 @@
-package kr.co.archan.reflect.auth.dto.response
+package kr.co.archan.reflect.unit.auth.dto.response
 
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe

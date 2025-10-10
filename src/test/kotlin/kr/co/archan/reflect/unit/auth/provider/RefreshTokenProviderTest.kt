@@ -1,4 +1,4 @@
-package kr.co.archan.reflect.auth.provider
+package kr.co.archan.reflect.unit.auth.provider
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
@@ -11,6 +11,7 @@ import io.mockk.slot
 import io.mockk.verify
 import kr.co.archan.reflect.auth.domain.RefreshToken
 import kr.co.archan.reflect.auth.properties.JwtProperties
+import kr.co.archan.reflect.auth.provider.RefreshTokenProvider
 import kr.co.archan.reflect.auth.repository.RefreshTokenRepository
 import java.time.Instant
 import kotlin.math.abs

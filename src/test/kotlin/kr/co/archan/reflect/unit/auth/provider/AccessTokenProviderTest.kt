@@ -1,4 +1,4 @@
-package kr.co.archan.reflect.auth.provider
+package kr.co.archan.reflect.unit.auth.provider
 
 import com.nimbusds.jwt.SignedJWT
 import io.kotest.assertions.throwables.shouldThrow

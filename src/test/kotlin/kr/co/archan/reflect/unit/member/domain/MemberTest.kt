@@ -1,4 +1,4 @@
-package kr.co.archan.reflect.member.domain
+package kr.co.archan.reflect.unit.member.domain
 
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe

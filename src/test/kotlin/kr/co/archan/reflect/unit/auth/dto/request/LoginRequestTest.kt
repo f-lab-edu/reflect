@@ -1,4 +1,4 @@
-package kr.co.archan.reflect.auth.dto.request
+package kr.co.archan.reflect.unit.auth.dto.request
 
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
@@ -8,6 +8,7 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.string.shouldContain
 import jakarta.validation.Validation
 import jakarta.validation.Validator
+import kr.co.archan.reflect.auth.dto.request.LoginRequest
 
 class LoginRequestTest : BehaviorSpec({
     

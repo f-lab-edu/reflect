@@ -1,4 +1,4 @@
-package kr.co.archan.reflect.member.service
+package kr.co.archan.reflect.unit.member.service
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec

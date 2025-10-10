@@ -1,4 +1,4 @@
-package kr.co.archan.reflect.global.util
+package kr.co.archan.reflect.unit.global.util
 
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe

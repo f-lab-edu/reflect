@@ -1,9 +1,10 @@
-package kr.co.archan.reflect.auth.controller
+package kr.co.archan.reflect.unit.auth.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.kotest.core.spec.style.BehaviorSpec
 import io.mockk.every
 import io.mockk.mockk
+import kr.co.archan.reflect.auth.controller.AuthController
 import kr.co.archan.reflect.auth.dto.request.LoginRequest
 import kr.co.archan.reflect.auth.properties.JwtProperties
 import kr.co.archan.reflect.auth.provider.AccessTokenProvider
