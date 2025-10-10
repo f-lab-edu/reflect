@@ -29,7 +29,7 @@ class AuthServiceTest {
     private lateinit var memberService: MemberService
     private lateinit var tokenService: TokenService
     private lateinit var crypto: Crypto
-    
+
     // Mock 필요한 외부 의존성
     private lateinit var memberRepository: MemberRepository
     private lateinit var jwtProperties: JwtProperties
@@ -47,24 +47,24 @@ class AuthServiceTest {
             every { accessTokenTtlSeconds } returns 3600L
             every { refreshTokenTtlSeconds } returns 1209600L
         }
-        
+
         cryptoProperties = mockk {
             every { hashKey } returns "test-hash-key"
             every { pepperKey } returns "test-pepper"
         }
-        
+
         // 외부 저장소 모킹
         memberRepository = mockk()
         refreshTokenRepository = mockk(relaxed = true)
-        
+
         // 실제 PasswordEncoder 사용
         passwordEncoder = Argon2PasswordEncoder(16, 32, 1, 64 * 1024, 3)
 
         crypto = Crypto(cryptoProperties, passwordEncoder)
-        
+
         val accessTokenProvider = AccessTokenProvider(jwtProperties)
         val refreshTokenProvider = RefreshTokenProvider(jwtProperties, refreshTokenRepository)
-        
+
         tokenService = TokenService(accessTokenProvider, refreshTokenProvider)
         memberService = MemberService(memberRepository)
         authService = AuthService(memberService, tokenService, crypto)
@@ -77,7 +77,7 @@ class AuthServiceTest {
         val email = "user@example.com"
         val rawPassword = "myPassword123!"
         val hashedPassword = crypto.hashPassword(rawPassword)
-        
+
         val member = Member.signUp(email, hashedPassword, "홍길동")
         every { memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns member
 
@@ -88,12 +88,12 @@ class AuthServiceTest {
         assertNotNull(result)
         assertNotNull(result.accessToken)
         assertNotNull(result.refreshToken)
-        
+
         // JWT 검증
         val jwt = SignedJWT.parse(result.accessToken.value)
         assertEquals(email, jwt.jwtClaimsSet.getStringClaim("email"))
         assertEquals(member.id.toString(), jwt.jwtClaimsSet.subject)
-        
+
         // Repository 호출 검증
         verify(exactly = 1) { memberRepository.findByEmailAndIsWithdrawnFalse(email) }
         verify(exactly = 1) { refreshTokenRepository.save(any()) }
@@ -111,7 +111,7 @@ class AuthServiceTest {
         assertThrows<MemberNotFoundException> {
             authService.loginMember(email, password)
         }
-        
+
         verify(exactly = 1) { memberRepository.findByEmailAndIsWithdrawnFalse(email) }
     }
 
@@ -123,7 +123,7 @@ class AuthServiceTest {
         val correctPassword = "correctPassword123!"
         val wrongPassword = "wrongPassword123!"
         val hashedPassword = crypto.hashPassword(correctPassword)
-        
+
         val member = Member.signUp(email, hashedPassword, "홍길동")
         every { memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns member
 
@@ -131,7 +131,7 @@ class AuthServiceTest {
         assertThrows<WrongPasswordException> {
             authService.loginMember(email, wrongPassword)
         }
-        
+
         verify(exactly = 1) { memberRepository.findByEmailAndIsWithdrawnFalse(email) }
     }
 
@@ -142,7 +142,7 @@ class AuthServiceTest {
         val email = "repeat@example.com"
         val password = "password123!"
         val hashedPassword = crypto.hashPassword(password)
-        
+
         val member = Member.signUp(email, hashedPassword, "반복로그인")
         every { memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns member
 
@@ -156,7 +156,7 @@ class AuthServiceTest {
         assertNotEquals(result1.accessToken.value, result2.accessToken.value)
         assertNotEquals(result2.accessToken.value, result3.accessToken.value)
         assertNotEquals(result1.refreshToken.value, result2.refreshToken.value)
-        
+
         verify(exactly = 3) { memberRepository.findByEmailAndIsWithdrawnFalse(email) }
         verify(exactly = 3) { refreshTokenRepository.save(any()) }
     }
@@ -169,7 +169,7 @@ class AuthServiceTest {
         val correctPassword = "Password123!"
         val wrongPassword = "password123!"  // 대소문자 다름
         val hashedPassword = crypto.hashPassword(correctPassword)
-        
+
         val member = Member.signUp(email, hashedPassword, "대소문자")
         every { memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns member
 
@@ -186,7 +186,7 @@ class AuthServiceTest {
         val email = "special@example.com"
         val password = "P@ssw0rd!#$%^&*()"
         val hashedPassword = crypto.hashPassword(password)
-        
+
         val member = Member.signUp(email, hashedPassword, "특수문자")
         every { memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns member
 
@@ -212,7 +212,36 @@ class AuthServiceTest {
         assertThrows<MemberNotFoundException> {
             authService.loginMember(email, password)
         }
-        
+
         verify(exactly = 1) { memberRepository.findByEmailAndIsWithdrawnFalse(email) }
+    }
+
+    @Test
+    @DisplayName("signup - 정상적인 회원가입")
+    fun `signup - 정상적인 회원가입`() {
+        //given
+        val email = "abc@gmail.com"
+        val password = "abcdefg"
+        val name = "abcd"
+
+        val hashedPassword = crypto.hashPassword(password)
+
+        every {memberRepository.save(any())} returns Member.signUp(email, hashedPassword, name)
+
+        //when
+        val result = authService.signUpMember(email, password, name)
+
+        // then
+        assertNotNull(result)
+        assertNotNull(result.accessToken)
+        assertNotNull(result.refreshToken)
+
+        // JWT 검증
+        val jwt = SignedJWT.parse(result.accessToken.value)
+        assertEquals(email, jwt.jwtClaimsSet.getStringClaim("email"))
+
+        // Repository 호출 검증
+        verify(exactly = 1) { memberRepository.save(any()) }
+        verify(exactly = 1) { refreshTokenRepository.save(any()) }
     }
 }
