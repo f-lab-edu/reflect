@@ -208,4 +208,17 @@ class AuthControllerTest {
             .andExpect(jsonPath("$.refreshToken").isNotEmpty)
     }
 
+    @Test
+    @DisplayName("POST /auth/signup - 중복 회원가입 동시성 문제 방지")
+    fun `POST auth signup - 중복 회원가입 동시성 문제 방지`() {
+        //given
+        val email = "abc@gmail.com"
+        val password = "abcdefg1!"
+        val name = "abcd"
+
+        val request = SignUpRequest(email, password, name)
+
+        
+    }
+
 }
