@@ -14,10 +14,6 @@ class MemberService (
     private val memberRepository: MemberRepository
 ){
 
-    @DistributedLock(
-        key = "#member.email",
-        prefix = "member:saveNewMember"
-    )
     @Transactional(propagation = Propagation.MANDATORY)
     fun saveNewMember(member: Member) : Member {
         if (memberRepository.existsByEmailAndIsWithdrawnFalse(member.email)) {
