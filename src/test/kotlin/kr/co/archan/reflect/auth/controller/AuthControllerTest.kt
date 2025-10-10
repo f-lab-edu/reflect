@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.every
 import io.mockk.mockk
 import kr.co.archan.reflect.auth.dto.request.LoginRequest
-import kr.co.archan.reflect.auth.exception.common.WrongPasswordException
+import kr.co.archan.reflect.auth.dto.request.SignUpRequest
 import kr.co.archan.reflect.auth.properties.JwtProperties
 import kr.co.archan.reflect.auth.provider.AccessTokenProvider
 import kr.co.archan.reflect.auth.provider.RefreshTokenProvider
@@ -15,7 +15,6 @@ import kr.co.archan.reflect.global.exception.handler.ServiceExceptionHandler
 import kr.co.archan.reflect.global.properties.CryptoProperties
 import kr.co.archan.reflect.global.util.Crypto
 import kr.co.archan.reflect.member.domain.Member
-import kr.co.archan.reflect.member.exception.common.MemberNotFoundException
 import kr.co.archan.reflect.member.repository.MemberRepository
 import kr.co.archan.reflect.member.service.MemberService
 import org.junit.jupiter.api.Test
@@ -64,7 +63,7 @@ class AuthControllerTest {
         memberRepository = mockk()
         refreshTokenRepository = mockk(relaxed = true)
         
-        // 실제 인스턴스 생성1ㅜ
+        // 실제 인스턴스 생성
         passwordEncoder = Argon2PasswordEncoder(16, 32, 1, 64 * 1024, 3)
         crypto = Crypto(cryptoProperties, passwordEncoder)
         
@@ -183,15 +182,30 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("POST /auth/login - 잘못된 JSON 형식으로 요청 시 실패")
-    fun `POST auth login - 잘못된 JSON 형식으로 요청 시 실패`() {
+    @DisplayName("POST /auth/signup - 올바른 정보로 회원가입 성공")
+    fun `POST auth signup - 올바른 정보로 회원가입 성공`() {
+        // given
+        val email = "abc@gmail.com"
+        val password = "abcdefg1!"
+        val name = "abcd"
+
+        val request = SignUpRequest(email, password, name)
+
+        every { memberRepository.save(any()) } returns Member.signUp(email, crypto.hashPassword(password), name)
+        every { memberRepository.existsByEmailAndIsWithdrawnFalse(any()) } returns false
+
         // when & then
         mockMvc.perform(
-            post("/auth/login")
+            post("/auth/signup")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"invalid\" \"json\"}")
+                .content(objectMapper.writeValueAsString(request))
         )
-            .andExpect(status().is4xxClientError)
+            .andExpect(status().isCreated)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.accessToken").exists())
+            .andExpect(jsonPath("$.refreshToken").exists())
+            .andExpect(jsonPath("$.accessToken").isNotEmpty)
+            .andExpect(jsonPath("$.refreshToken").isNotEmpty)
     }
 
 }
