@@ -2,6 +2,7 @@ package kr.co.archan.reflect.global.exception.handler
 
 import jakarta.servlet.http.HttpServletRequest
 import kr.co.archan.reflect.global.exception.base.ApiException
+import kr.co.archan.reflect.global.exception.common.LockAcquisitionException
 import kr.co.archan.reflect.global.exception.dto.ApiErrorResponseSpec
 import kr.co.archan.reflect.global.exception.dto.BasicErrorResponse
 import kr.co.archan.reflect.global.exception.dto.InvalidFieldDetail
@@ -27,6 +28,21 @@ class ServiceExceptionHandler {
     ): ResponseEntity<ApiErrorResponseSpec> {
         val problemDetail = BasicErrorResponse(ex, request)
         return ResponseEntity(problemDetail, ex.apiErrorSpec.httpStatus)
+    }
+
+    @ExceptionHandler(LockAcquisitionException::class)
+    fun handleLockAcquisitionException(
+        ex: LockAcquisitionException,
+        request: HttpServletRequest
+    ): ResponseEntity<ApiErrorResponseSpec> {
+        val problemDetail = BasicErrorResponse(
+            title = "LOCK_ACQUIRE_FAILED",
+            status = HttpStatus.CONFLICT.value(),
+            detail = "요청이 많아 실패했습니다, 다시 시도해주세요",
+            instance = request.requestURI
+        )
+
+        return ResponseEntity(problemDetail, HttpStatus.CONFLICT)
     }
 
     /**
