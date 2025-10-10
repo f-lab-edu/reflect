@@ -1,11 +1,8 @@
 package kr.co.archan.reflect.auth.service
 
-import kr.co.archan.reflect.auth.domain.AccessToken
-import kr.co.archan.reflect.auth.domain.RefreshToken
 import kr.co.archan.reflect.auth.dto.vo.AuthToken
 import kr.co.archan.reflect.auth.provider.AccessTokenProvider
 import kr.co.archan.reflect.auth.provider.RefreshTokenProvider
-import kr.co.archan.reflect.auth.repository.RefreshTokenRepository
 import kr.co.archan.reflect.member.domain.Member
 import kr.co.archan.reflect.member.repository.MemberRepository
 import org.springframework.data.repository.findByIdOrNull
@@ -20,7 +17,7 @@ class TokenService(
 ) {
 
     /**
-     * 로그인 토큰 발급을 시도하는 메서드.
+     * 토큰 발급을 시도하는 메서드.
      *
      * 이 메서드는 다음 단계를 수행한다:
      * 1. 외부 Provider로부터 Access Token과 Refresh Token을 발급받는다.
@@ -31,7 +28,7 @@ class TokenService(
      * @return AccessToken과 RefreshToken의 쌍
      */
     @Transactional(propagation = Propagation.MANDATORY)
-    fun issueOnLogin(member: Member): AuthToken {
+    fun issueToken(member: Member): AuthToken {
         val accessToken = accessTokenProvider.provideAccessToken(member.id, member.email)
         val refreshToken = refreshTokenProvider.provideRefreshToken(member.id)
 
