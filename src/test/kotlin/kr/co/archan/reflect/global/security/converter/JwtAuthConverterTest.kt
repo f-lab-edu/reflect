@@ -3,8 +3,8 @@ package kr.co.archan.reflect.global.security.converter
 import io.mockk.every
 import io.mockk.mockk
 import kr.co.archan.reflect.auth.domain.MemberPrincipal
-import kr.co.archan.reflect.auth.exception.common.JwtClaimFormatException
-import kr.co.archan.reflect.auth.exception.common.JwtRequiredClaimMissingException
+import kr.co.archan.reflect.auth.exception.common.AuthException
+import kr.co.archan.reflect.auth.exception.types.AuthErrorCode
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Assertions.*
@@ -92,9 +92,12 @@ class JwtAuthConverterTest {
         }
         
         // when & then
-        assertThrows<JwtRequiredClaimMissingException> {
+        val exception = assertThrows<AuthException> {
             jwtAuthConverter.convert(jwt)
         }
+        
+        // ErrorCode 검증
+        assertEquals(AuthErrorCode.JWT_REQUIRED_CLAIM_MISSING, exception.apiErrorSpec)
     }
 
     @Test
@@ -108,9 +111,12 @@ class JwtAuthConverterTest {
         }
         
         // when & then
-        assertThrows<JwtRequiredClaimMissingException> {
+        val exception = assertThrows<AuthException> {
             jwtAuthConverter.convert(jwt)
         }
+        
+        // ErrorCode 검증
+        assertEquals(AuthErrorCode.JWT_REQUIRED_CLAIM_MISSING, exception.apiErrorSpec)
     }
 
     @Test
@@ -127,9 +133,12 @@ class JwtAuthConverterTest {
         }
         
         // when & then
-        assertThrows<JwtClaimFormatException> {
+        val exception = assertThrows<AuthException> {
             jwtAuthConverter.convert(jwt)
         }
+        
+        // ErrorCode 검증
+        assertEquals(AuthErrorCode.JWT_CLAIM_FORMAT_INVALID, exception.apiErrorSpec)
     }
 
     @Test

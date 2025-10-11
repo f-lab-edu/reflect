@@ -4,7 +4,8 @@ import com.nimbusds.jwt.SignedJWT
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import kr.co.archan.reflect.auth.exception.common.WrongPasswordException
+import kr.co.archan.reflect.auth.exception.common.AuthException
+import kr.co.archan.reflect.auth.exception.types.AuthErrorCode
 import kr.co.archan.reflect.auth.properties.JwtProperties
 import kr.co.archan.reflect.auth.provider.AccessTokenProvider
 import kr.co.archan.reflect.auth.provider.RefreshTokenProvider
@@ -12,7 +13,8 @@ import kr.co.archan.reflect.auth.repository.RefreshTokenRepository
 import kr.co.archan.reflect.global.properties.CryptoProperties
 import kr.co.archan.reflect.global.util.Crypto
 import kr.co.archan.reflect.member.domain.Member
-import kr.co.archan.reflect.member.exception.common.MemberNotFoundException
+import kr.co.archan.reflect.member.exception.common.MemberException
+import kr.co.archan.reflect.member.exception.types.MemberErrorCode
 import kr.co.archan.reflect.member.repository.MemberRepository
 import kr.co.archan.reflect.member.service.MemberService
 import org.junit.jupiter.api.Test
@@ -108,9 +110,12 @@ class AuthServiceTest {
         every { memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns null
 
         // when & then
-        assertThrows<MemberNotFoundException> {
+        val exception = assertThrows<MemberException> {
             authService.loginMember(email, password)
         }
+        
+        // ErrorCode 검증
+        assertEquals(MemberErrorCode.MEMBER_NOT_FOUND, exception.apiErrorSpec)
         
         verify(exactly = 1) { memberRepository.findByEmailAndIsWithdrawnFalse(email) }
     }
@@ -128,9 +133,12 @@ class AuthServiceTest {
         every { memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns member
 
         // when & then
-        assertThrows<WrongPasswordException> {
+        val exception = assertThrows<AuthException> {
             authService.loginMember(email, wrongPassword)
         }
+        
+        // ErrorCode 검증
+        assertEquals(AuthErrorCode.WRONG_PASSWORD, exception.apiErrorSpec)
         
         verify(exactly = 1) { memberRepository.findByEmailAndIsWithdrawnFalse(email) }
     }
@@ -174,9 +182,12 @@ class AuthServiceTest {
         every { memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns member
 
         // when & then
-        assertThrows<WrongPasswordException> {
+        val exception = assertThrows<AuthException> {
             authService.loginMember(email, wrongPassword)
         }
+        
+        // ErrorCode 검증
+        assertEquals(AuthErrorCode.WRONG_PASSWORD, exception.apiErrorSpec)
     }
 
     @Test
@@ -209,9 +220,12 @@ class AuthServiceTest {
         every { memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns null
 
         // when & then
-        assertThrows<MemberNotFoundException> {
+        val exception = assertThrows<MemberException> {
             authService.loginMember(email, password)
         }
+        
+        // ErrorCode 검증
+        assertEquals(MemberErrorCode.MEMBER_NOT_FOUND, exception.apiErrorSpec)
         
         verify(exactly = 1) { memberRepository.findByEmailAndIsWithdrawnFalse(email) }
     }

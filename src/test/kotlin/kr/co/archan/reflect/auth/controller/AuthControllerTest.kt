@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.every
 import io.mockk.mockk
 import kr.co.archan.reflect.auth.dto.request.LoginRequest
-import kr.co.archan.reflect.auth.exception.common.WrongPasswordException
+import kr.co.archan.reflect.auth.exception.common.AuthException
 import kr.co.archan.reflect.auth.properties.JwtProperties
 import kr.co.archan.reflect.auth.provider.AccessTokenProvider
 import kr.co.archan.reflect.auth.provider.RefreshTokenProvider
@@ -15,7 +15,7 @@ import kr.co.archan.reflect.global.exception.handler.ServiceExceptionHandler
 import kr.co.archan.reflect.global.properties.CryptoProperties
 import kr.co.archan.reflect.global.util.Crypto
 import kr.co.archan.reflect.member.domain.Member
-import kr.co.archan.reflect.member.exception.common.MemberNotFoundException
+import kr.co.archan.reflect.member.exception.common.MemberException
 import kr.co.archan.reflect.member.repository.MemberRepository
 import kr.co.archan.reflect.member.service.MemberService
 import org.junit.jupiter.api.Test

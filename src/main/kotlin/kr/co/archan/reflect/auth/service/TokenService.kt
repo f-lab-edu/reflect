@@ -7,7 +7,6 @@ import kr.co.archan.reflect.auth.provider.AccessTokenProvider
 import kr.co.archan.reflect.auth.provider.RefreshTokenProvider
 import kr.co.archan.reflect.auth.repository.RefreshTokenRepository
 import kr.co.archan.reflect.member.domain.Member
-import kr.co.archan.reflect.member.exception.common.MemberNotFoundException
 import kr.co.archan.reflect.member.repository.MemberRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service

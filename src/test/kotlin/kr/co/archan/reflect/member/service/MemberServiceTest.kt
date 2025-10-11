@@ -4,7 +4,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kr.co.archan.reflect.member.domain.Member
-import kr.co.archan.reflect.member.exception.common.MemberNotFoundException
+import kr.co.archan.reflect.member.exception.common.MemberException
+import kr.co.archan.reflect.member.exception.types.MemberErrorCode
 import kr.co.archan.reflect.member.repository.MemberRepository
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName
@@ -55,11 +56,14 @@ class MemberServiceTest {
         every { memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns null
 
         // when & then
-        val exception = assertThrows<MemberNotFoundException> {
+        val exception = assertThrows<MemberException> {
             memberService.getMember(email)
         }
 
+        // Exception과 ErrorCode 검증
         assertNotNull(exception)
+        assertEquals(MemberErrorCode.MEMBER_NOT_FOUND, exception.apiErrorSpec)
+        
         verify(exactly = 1) { memberRepository.findByEmailAndIsWithdrawnFalse(email) }
     }
 
@@ -94,9 +98,12 @@ class MemberServiceTest {
         every { memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns null
 
         // when & then
-        assertThrows<MemberNotFoundException> {
+        val exception = assertThrows<MemberException> {
             memberService.getMember(email)
         }
+        
+        // ErrorCode 검증
+        assertEquals(MemberErrorCode.MEMBER_NOT_FOUND, exception.apiErrorSpec)
 
         verify(exactly = 1) { memberRepository.findByEmailAndIsWithdrawnFalse(email) }
     }

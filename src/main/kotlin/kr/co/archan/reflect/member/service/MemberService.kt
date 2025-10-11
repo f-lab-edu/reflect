@@ -1,7 +1,8 @@
 package kr.co.archan.reflect.member.service
 
 import kr.co.archan.reflect.member.domain.Member
-import kr.co.archan.reflect.member.exception.common.MemberNotFoundException
+import kr.co.archan.reflect.member.exception.common.MemberException
+import kr.co.archan.reflect.member.exception.types.MemberErrorCode
 import kr.co.archan.reflect.member.repository.MemberRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
@@ -14,6 +15,6 @@ class MemberService (
 
     @Transactional(propagation = Propagation.REQUIRED)
     fun getMember(email: String) : Member {
-        return memberRepository.findByEmailAndIsWithdrawnFalse(email) ?: throw MemberNotFoundException()
+        return memberRepository.findByEmailAndIsWithdrawnFalse(email) ?: throw MemberException(MemberErrorCode.MEMBER_NOT_FOUND)
     }
 }

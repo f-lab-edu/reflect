@@ -4,7 +4,8 @@ import kr.co.archan.reflect.auth.domain.AccessToken
 import kr.co.archan.reflect.auth.domain.RefreshToken
 import kr.co.archan.reflect.auth.dto.response.LoginResponse
 import kr.co.archan.reflect.auth.dto.vo.AuthToken
-import kr.co.archan.reflect.auth.exception.common.WrongPasswordException
+import kr.co.archan.reflect.auth.exception.common.AuthException
+import kr.co.archan.reflect.auth.exception.types.AuthErrorCode
 import kr.co.archan.reflect.global.util.Crypto
 import kr.co.archan.reflect.member.service.MemberService
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -22,7 +23,7 @@ class AuthService (
     @Transactional
     fun loginMember(email: String, password: String) : AuthToken {
         val member = memberService.getMember(email)
-        if(!crypto.isPasswordMatches(member.password, password)) throw WrongPasswordException()
+        if(!crypto.isPasswordMatches(member.password, password)) throw AuthException(AuthErrorCode.WRONG_PASSWORD)
         return tokenService.issueOnLogin(member)
     }
 
