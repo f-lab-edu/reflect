@@ -13,7 +13,7 @@ class MemberService (
     private val memberRepository: MemberRepository
 ){
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional
     fun getMember(email: String) : Member {
         return memberRepository.findByEmailAndIsWithdrawnFalse(email) ?: throw MemberException(MemberErrorCode.MEMBER_NOT_FOUND)
     }
