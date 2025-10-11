@@ -25,13 +25,7 @@ class ServiceExceptionHandler {
         ex: ApiException,
         request: HttpServletRequest
     ): ResponseEntity<ApiErrorResponseSpec> {
-        val problemDetail = BasicErrorResponse(
-            title = ex.apiErrorSpec.systemMessage,
-            status = ex.apiErrorSpec.httpStatus.value(),
-            detail = ex.apiErrorSpec.userMessage,
-            instance = request.requestURI
-        )
-        
+        val problemDetail = BasicErrorResponse(ex, request)
         return ResponseEntity(problemDetail, ex.apiErrorSpec.httpStatus)
     }
 
