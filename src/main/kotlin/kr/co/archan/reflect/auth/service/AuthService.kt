@@ -20,7 +20,7 @@ class AuthService (
     private val crypto: Crypto
 ){
 
-    @Transactional
+    @Transactional(readOnly = true)
     fun loginMember(email: String, password: String) : AuthToken {
         val member = memberService.getMember(email)
         if(!crypto.isPasswordMatches(member.password, password)) throw AuthException(AuthErrorCode.WRONG_PASSWORD)
