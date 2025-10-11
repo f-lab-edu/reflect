@@ -27,12 +27,12 @@ class ServiceExceptionHandler {
     ): ResponseEntity<ApiErrorResponseSpec> {
         val problemDetail = BasicErrorResponse(
             title = ex.apiErrorSpec.systemMessage,
-            status = ex.httpStatus.value(),
+            status = ex.apiErrorSpec.httpStatus.value(),
             detail = ex.apiErrorSpec.userMessage,
             instance = request.requestURI
         )
         
-        return ResponseEntity(problemDetail, ex.httpStatus)
+        return ResponseEntity(problemDetail, ex.apiErrorSpec.httpStatus)
     }
 
     /**
