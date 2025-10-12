@@ -1,27 +1,26 @@
 package kr.co.archan.reflect.member.domain
 
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
+import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.shouldBe
 
+class MemberTest : BehaviorSpec({
 
-class MemberTest {
+    context("signUp - 성공") {
+        Given("유효한 이메일, 패스워드, 이름이 주어지고") {
+            val email = "test@example.com"
+            val password = "securePassword123!"
+            val name = "홍길동"
 
-    @Test
-    @DisplayName("signUp 성공")
-    fun `signUp 성공`() {
-        val email = "test@example.com"
-        val password = "securePassword123!"
-        val name = "홍길동"
+            When("Member를 생성하면") {
+                val member = Member.signUp(email, password, name)
 
-        val member = Member.signUp(email, password, name)
-
-        assertAll("Member 생성",
-            { assertEquals(0, member.id) },
-            { assertEquals(email, member.email) },
-            { assertEquals(password, member.password) },
-            { assertEquals(name, member.name) }
-        )
+                Then("Member가 올바르게 생성된다") {
+                    member.id shouldBe 0
+                    member.email shouldBe email
+                    member.password shouldBe password
+                    member.name shouldBe name
+                }
+            }
+        }
     }
-
-}
+})

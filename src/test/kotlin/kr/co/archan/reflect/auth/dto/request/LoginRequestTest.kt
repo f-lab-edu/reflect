@@ -1,210 +1,237 @@
 package kr.co.archan.reflect.auth.dto.request
 
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
+import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.string.shouldContain
 import jakarta.validation.Validation
 import jakarta.validation.Validator
 
-class LoginRequestTest {
-
-    private val validator: Validator = Validation.buildDefaultValidatorFactory().validator
-
-    @Test
-    @DisplayName("LoginRequest 생성 성공")
-    fun `LoginRequest 생성 성공`() {
-        // given
-        val email = "test@example.com"
-        val password = "securePassword123!"
-
-        // when
-        val request = LoginRequest(email, password)
-
-        // then
-        assertAll("LoginRequest 생성",
-            { assertEquals(email, request.email) },
-            { assertEquals(password, request.password) }
-        )
+class LoginRequestTest : BehaviorSpec({
+    
+    val validator: Validator = Validation.buildDefaultValidatorFactory().validator
+    
+    context("LoginRequest 생성 - 성공") {
+        Given("유효한 이메일과 패스워드가 주어지고") {
+            val email = "test@example.com"
+            val password = "securePassword123!"
+            
+            When("LoginRequest를 생성하면") {
+                val request = LoginRequest(email, password)
+                
+                Then("이메일과 패스워드가 정상적으로 설정된다") {
+                    request.email shouldBe email
+                    request.password shouldBe password
+                }
+            }
+        }
     }
-
-    @Test
-    @DisplayName("검증 성공 - 유효한 이메일과 패스워드")
-    fun `검증 성공 - 유효한 이메일과 패스워드`() {
-        // given
-        val request = LoginRequest("valid@example.com", "validPass123!")
-
-        // when
-        val violations = validator.validate(request)
-
-        // then
-        assertTrue(violations.isEmpty())
+    
+    context("검증 성공 - 유효한 이메일과 패스워드") {
+        Given("유효한 이메일과 패스워드로 LoginRequest가 생성되고") {
+            val request = LoginRequest("valid@example.com", "validPass123!")
+            
+            When("검증을 수행하면") {
+                val violations = validator.validate(request)
+                
+                Then("검증 오류가 없다") {
+                    violations.shouldBeEmpty()
+                }
+            }
+        }
     }
-
-    @Test
-    @DisplayName("이메일 검증 실패 - 이메일 공백")
-    fun `이메일 검증 실패 - 이메일 공백`() {
-        // given
-        val email = ""
-        val password = "securePassword123!"
-
-        // when
-        val violations = validator.validate(LoginRequest(email, password))
-
-        // then
-        assertTrue(violations.isNotEmpty())
-        assertTrue(violations.any { it.propertyPath.toString() == "email" })
+    
+    context("이메일 검증 실패 - 이메일 공백") {
+        Given("이메일이 공백이고") {
+            val email = ""
+            val password = "securePassword123!"
+            
+            When("LoginRequest를 검증하면") {
+                val violations = validator.validate(LoginRequest(email, password))
+                
+                Then("이메일 검증 오류가 발생한다") {
+                    violations.shouldNotBeEmpty()
+                    violations.any { it.propertyPath.toString() == "email" } shouldBe true
+                }
+            }
+        }
     }
-
-    @Test
-    @DisplayName("이메일 검증 실패 - @ 없음")
-    fun `이메일 검증 실패 - @ 없음`() {
-        // given
-        val email = "invalid-email"
-        val password = "securePassword123!"
-
-        // when
-        val violations = validator.validate(LoginRequest(email, password))
-
-        // then
-        assertTrue(violations.isNotEmpty())
-        assertTrue(violations.any { it.propertyPath.toString() == "email" })
+    
+    context("이메일 검증 실패 - @ 없음") {
+        Given("이메일에 @가 없고") {
+            val email = "invalid-email"
+            val password = "securePassword123!"
+            
+            When("LoginRequest를 검증하면") {
+                val violations = validator.validate(LoginRequest(email, password))
+                
+                Then("이메일 검증 오류가 발생한다") {
+                    violations.shouldNotBeEmpty()
+                    violations.any { it.propertyPath.toString() == "email" } shouldBe true
+                }
+            }
+        }
     }
-
-    @Test
-    @DisplayName("이메일 검증 실패 - 255자 이상")
-    fun `이메일 검증 실패 - 255자 이상`() {
-        // given
-        val email = "testasdfsdfsasdfdasasdfddasfdddudgfiausgdiufgisdugfiugasidugfiausgdfigusadftestasdfsdfsdfsdftsadfgsdgfiuagsidufgisudgfiausgdiufgisdugfiugasidugfiausgdfigusadftestasdfsdfsdfsdftsadfgsdgfiuagsidufgisudgfiausgdiufgisdugfiugasidugfiausgdfigusadfasdfdd@test.com"
-        val password = "securePassword123!"
-
-        // when
-        val violations = validator.validate(LoginRequest(email, password))
-
-        // then
-        assertTrue(violations.isNotEmpty())
-        assertTrue(violations.any { it.propertyPath.toString() == "email" })
+    
+    context("이메일 검증 실패 - 255자 이상") {
+        Given("이메일이 255자 이상이고") {
+            val email = "testasdfsdfsasdfdasasdfddasfdddudgfiausgdiufgisdugfiugasidugfiausgdfigusadftestasdfsdfsdfsdftsadfgsdgfiuagsidufgisudgfiausgdiufgisdugfiugasidugfiausgdfigusadftestasdfsdfsdfsdftsadfgsdgfiuagsidufgisudgfiausgdiufgisdugfiugasidugfiausgdfigusadfasdfdd@test.com"
+            val password = "securePassword123!"
+            
+            When("LoginRequest를 검증하면") {
+                val violations = validator.validate(LoginRequest(email, password))
+                
+                Then("이메일 검증 오류가 발생한다") {
+                    violations.shouldNotBeEmpty()
+                    violations.any { it.propertyPath.toString() == "email" } shouldBe true
+                }
+            }
+        }
     }
-
-    @Test
-    @DisplayName("패스워드 검증 실패 - 패스워드 7자 이하")
-    fun `패스워드 검증 실패 - 패스워드 7자 이하`() {
-        // given
-        val email = "test@example.com"
-        val password = "pass1!"
-
-        // when
-        val violations = validator.validate(LoginRequest(email, password))
-
-        // then
-        assertTrue(violations.isNotEmpty())
-        assertTrue(violations.any { it.propertyPath.toString() == "password" })
+    
+    context("패스워드 검증 실패 - 패스워드 7자 이하") {
+        Given("패스워드가 7자 이하이고") {
+            val email = "test@example.com"
+            val password = "pass1!"
+            
+            When("LoginRequest를 검증하면") {
+                val violations = validator.validate(LoginRequest(email, password))
+                
+                Then("패스워드 검증 오류가 발생한다") {
+                    violations.shouldNotBeEmpty()
+                    violations.any { it.propertyPath.toString() == "password" } shouldBe true
+                }
+            }
+        }
     }
-
-    @Test
-    @DisplayName("패스워드 검증 실패 - 패스워드 65자 이상")
-    fun `패스워드 검증 실패 - 패스워드 65자 이상`() {
-        // given
-        val email = "test@example.com"
-        val password = "verylongpasswordverylongpasswordverylongpasswordverylongpaslong1!"
-
-        // when
-        val violations = validator.validate(LoginRequest(email, password))
-
-        // then
-        assertTrue(violations.isNotEmpty())
-        assertTrue(violations.any { it.propertyPath.toString() == "password" })
+    
+    context("패스워드 검증 실패 - 패스워드 65자 이상") {
+        Given("패스워드가 65자 이상이고") {
+            val email = "test@example.com"
+            val password = "verylongpasswordverylongpasswordverylongpasswordverylongpaslong1!"
+            
+            When("LoginRequest를 검증하면") {
+                val violations = validator.validate(LoginRequest(email, password))
+                
+                Then("패스워드 검증 오류가 발생한다") {
+                    violations.shouldNotBeEmpty()
+                    violations.any { it.propertyPath.toString() == "password" } shouldBe true
+                }
+            }
+        }
     }
-
-    @Test
-    @DisplayName("패스워드 검증 실패 - 숫자 없음")
-    fun `패스워드 검증 실패 - 숫자 없음`() {
-        // given
-        val email = "test@example.com"
-        val password = "passwordwithoutdigit!"
-
-        // when
-        val violations = validator.validate(LoginRequest(email, password))
-
-        // then
-        assertTrue(violations.isNotEmpty())
-        assertTrue(violations.any { it.propertyPath.toString() == "password" })
+    
+    context("패스워드 검증 실패 - 숫자 없음") {
+        Given("패스워드에 숫자가 없고") {
+            val email = "test@example.com"
+            val password = "passwordwithoutdigit!"
+            
+            When("LoginRequest를 검증하면") {
+                val violations = validator.validate(LoginRequest(email, password))
+                
+                Then("패스워드 검증 오류가 발생한다") {
+                    violations.shouldNotBeEmpty()
+                    violations.any { it.propertyPath.toString() == "password" } shouldBe true
+                }
+            }
+        }
     }
-
-    @Test
-    @DisplayName("패스워드 검증 실패 - 특수문자 없음")
-    fun `패스워드 검증 실패 - 특수문자 없음`() {
-        // given
-        val email = "test@example.com"
-        val password = "passwordwithoutspecial123"
-
-        // when
-        val violations = validator.validate(LoginRequest(email, password))
-
-        // then
-        assertTrue(violations.isNotEmpty())
-        assertTrue(violations.any { it.propertyPath.toString() == "password" })
+    
+    context("패스워드 검증 실패 - 특수문자 없음") {
+        Given("패스워드에 특수문자가 없고") {
+            val email = "test@example.com"
+            val password = "passwordwithoutspecial123"
+            
+            When("LoginRequest를 검증하면") {
+                val violations = validator.validate(LoginRequest(email, password))
+                
+                Then("패스워드 검증 오류가 발생한다") {
+                    violations.shouldNotBeEmpty()
+                    violations.any { it.propertyPath.toString() == "password" } shouldBe true
+                }
+            }
+        }
     }
-
-    @Test
-    @DisplayName("equals - 같은 값을 가진 LoginRequest는 동등함")
-    fun `equals - 같은 값을 가진 LoginRequest는 동등함`() {
-        // given
-        val request1 = LoginRequest("test@example.com", "password123!")
-        val request2 = LoginRequest("test@example.com", "password123!")
-
-        // when & then
-        assertEquals(request1, request2)
+    
+    context("equals - 같은 값을 가진 LoginRequest는 동등함") {
+        Given("같은 값을 가진 두 개의 LoginRequest가 있고") {
+            val request1 = LoginRequest("test@example.com", "password123!")
+            val request2 = LoginRequest("test@example.com", "password123!")
+            
+            When("두 객체를 비교하면") {
+                val result = request1 == request2
+                
+                Then("동등하다") {
+                    result shouldBe true
+                    request1 shouldBe request2
+                }
+            }
+        }
     }
-
-    @Test
-    @DisplayName("equals - 다른 값을 가진 LoginRequest는 동등하지 않음")
-    fun `equals - 다른 값을 가진 LoginRequest는 동등하지 않음`() {
-        // given
-        val request1 = LoginRequest("test1@example.com", "password123!")
-        val request2 = LoginRequest("test2@example.com", "password123!")
-
-        // when & then
-        assertNotEquals(request1, request2)
+    
+    context("equals - 다른 값을 가진 LoginRequest는 동등하지 않음") {
+        Given("다른 값을 가진 두 개의 LoginRequest가 있고") {
+            val request1 = LoginRequest("test1@example.com", "password123!")
+            val request2 = LoginRequest("test2@example.com", "password123!")
+            
+            When("두 객체를 비교하면") {
+                val result = request1 == request2
+                
+                Then("동등하지 않다") {
+                    result shouldBe false
+                    request1 shouldNotBe request2
+                }
+            }
+        }
     }
-
-    @Test
-    @DisplayName("hashCode - 같은 값을 가진 LoginRequest는 같은 hashCode")
-    fun `hashCode - 같은 값을 가진 LoginRequest는 같은 hashCode`() {
-        // given
-        val request1 = LoginRequest("test@example.com", "password123!")
-        val request2 = LoginRequest("test@example.com", "password123!")
-
-        // when & then
-        assertEquals(request1.hashCode(), request2.hashCode())
+    
+    context("hashCode - 같은 값을 가진 LoginRequest는 같은 hashCode") {
+        Given("같은 값을 가진 두 개의 LoginRequest가 있고") {
+            val request1 = LoginRequest("test@example.com", "password123!")
+            val request2 = LoginRequest("test@example.com", "password123!")
+            
+            When("hashCode를 비교하면") {
+                val hashCode1 = request1.hashCode()
+                val hashCode2 = request2.hashCode()
+                
+                Then("같은 hashCode를 반환한다") {
+                    hashCode1 shouldBe hashCode2
+                }
+            }
+        }
     }
-
-    @Test
-    @DisplayName("copy - 일부 프로퍼티 변경")
-    fun `copy - 일부 프로퍼티 변경`() {
-        // given
-        val original = LoginRequest("original@example.com", "password123!")
-        val newEmail = "new@example.com"
-
-        // when
-        val copied = original.copy(email = newEmail)
-
-        // then
-        assertEquals(newEmail, copied.email)
-        assertEquals(original.password, copied.password)
+    
+    context("copy - 일부 프로퍼티 변경") {
+        Given("LoginRequest가 있고") {
+            val original = LoginRequest("original@example.com", "password123!")
+            val newEmail = "new@example.com"
+            
+            When("일부 프로퍼티를 변경하여 복사하면") {
+                val copied = original.copy(email = newEmail)
+                
+                Then("새로운 인스턴스가 생성되고 변경된 값만 반영된다") {
+                    copied.email shouldBe newEmail
+                    copied.password shouldBe original.password
+                }
+            }
+        }
     }
-
-    @Test
-    @DisplayName("toString - 문자열 표현 포함")
-    fun `toString - 문자열 표현 포함`() {
-        // given
-        val request = LoginRequest("test@example.com", "password123!")
-
-        // when
-        val result = request.toString()
-
-        // then
-        assertNotNull(result)
-        assertTrue(result.contains("LoginRequest"))
-        assertTrue(result.contains("test@example.com"))
+    
+    context("toString - 문자열 표현 포함") {
+        Given("LoginRequest가 있고") {
+            val request = LoginRequest("test@example.com", "password123!")
+            
+            When("toString을 호출하면") {
+                val result = request.toString()
+                
+                Then("올바른 문자열 표현이 반환된다") {
+                    result shouldNotBe null
+                    result shouldContain "LoginRequest"
+                    result shouldContain "test@example.com"
+                }
+            }
+        }
     }
-}
+})

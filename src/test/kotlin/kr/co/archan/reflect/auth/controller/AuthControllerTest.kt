@@ -1,10 +1,10 @@
 package kr.co.archan.reflect.auth.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.kotest.core.spec.style.BehaviorSpec
 import io.mockk.every
 import io.mockk.mockk
 import kr.co.archan.reflect.auth.dto.request.LoginRequest
-import kr.co.archan.reflect.auth.exception.common.AuthException
 import kr.co.archan.reflect.auth.properties.JwtProperties
 import kr.co.archan.reflect.auth.provider.AccessTokenProvider
 import kr.co.archan.reflect.auth.provider.RefreshTokenProvider
@@ -14,184 +14,173 @@ import kr.co.archan.reflect.auth.service.TokenService
 import kr.co.archan.reflect.global.exception.handler.ServiceExceptionHandler
 import kr.co.archan.reflect.global.properties.CryptoProperties
 import kr.co.archan.reflect.global.util.Crypto
-import kr.co.archan.reflect.member.domain.Member
-import kr.co.archan.reflect.member.exception.common.MemberException
 import kr.co.archan.reflect.member.repository.MemberRepository
 import kr.co.archan.reflect.member.service.MemberService
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.BeforeEach
 import org.springframework.http.MediaType
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 
-class AuthControllerTest {
-
-    private lateinit var mockMvc: MockMvc
-    private lateinit var authController: AuthController
-    private lateinit var authService: AuthService
-    private lateinit var objectMapper: ObjectMapper
+class AuthControllerTest : BehaviorSpec({
     
-    // Mock 필요한 외부 의존성
-    private lateinit var memberRepository: MemberRepository
-    private lateinit var jwtProperties: JwtProperties
-    private lateinit var refreshTokenRepository: RefreshTokenRepository
-    private lateinit var cryptoProperties: CryptoProperties
-    private lateinit var passwordEncoder: PasswordEncoder
-    private lateinit var crypto: Crypto
-
-    @BeforeEach
-    fun setUp() {
-        // Properties 모킹
-        jwtProperties = mockk {
+    fun createTestComponents() = object {
+        val jwtProperties = mockk<JwtProperties> {
             every { issuer } returns "test-issuer"
             every { audience } returns "test-audience"
             every { secret } returns "test-secret-key-for-jwt-signing-must-be-long-enough-at-least-256-bits"
             every { accessTokenTtlSeconds } returns 3600L
             every { refreshTokenTtlSeconds } returns 1209600L
         }
-        
-        cryptoProperties = mockk {
-            every { hashKey } returns "test-hash-key"
-            every { pepperKey } returns "test-pepper"
-        }
-        
-        // 외부 저장소 모킹
-        memberRepository = mockk()
-        refreshTokenRepository = mockk(relaxed = true)
-        
-        // 실제 인스턴스 생성1ㅜ
-        passwordEncoder = Argon2PasswordEncoder(16, 32, 1, 64 * 1024, 3)
-        crypto = Crypto(cryptoProperties, passwordEncoder)
-        
+        val cryptoProperties = CryptoProperties(
+            hashKey = "test-hash-key",
+            pepperKey = "test-pepper"
+        )
+        val memberRepository = mockk<MemberRepository>()
+        val refreshTokenRepository = mockk<RefreshTokenRepository>(relaxed = true)
+        val passwordEncoder = Argon2PasswordEncoder(16, 32, 1, 64 * 1024, 3)
+        val crypto = Crypto(cryptoProperties, passwordEncoder)
         val accessTokenProvider = AccessTokenProvider(jwtProperties)
         val refreshTokenProvider = RefreshTokenProvider(jwtProperties, refreshTokenRepository)
         val tokenService = TokenService(accessTokenProvider, refreshTokenProvider)
         val memberService = MemberService(memberRepository)
-        
-        authService = AuthService(memberService, tokenService, crypto)
-        authController = AuthController(authService)
-        
-        // MockMvc 설정 (standalone + ExceptionHandler)
-        mockMvc = MockMvcBuilders.standaloneSetup(authController)
+        val authService = AuthService(memberService, tokenService, crypto)
+        val authController = AuthController(authService)
+        val mockMvc = MockMvcBuilders.standaloneSetup(authController)
             .setControllerAdvice(ServiceExceptionHandler())
             .build()
-        objectMapper = ObjectMapper()
+        val objectMapper = ObjectMapper()
     }
 
-    @Test
-    @DisplayName("POST /auth/login - 올바른 이메일과 비밀번호로 로그인 성공")
-    fun `POST auth login - 올바른 이메일과 비밀번호로 로그인 성공`() {
-        // given
-        val email = "user@example.com"
-        val rawPassword = "myPassword123!"
-        val hashedPassword = crypto.hashPassword(rawPassword)
-        
-        val member = Member.signUp(email, hashedPassword, "홍길동")
-        every { memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns member
-        
-        val request = LoginRequest(email, rawPassword)
+    context("POST /auth/login - 올바른 이메일과 비밀번호로 로그인 성공") {
+        Given("올바른 이메일과 비밀번호를 가진 회원이 있고") {
+            val tc = createTestComponents()
+            
+            val email = "user@example.com"
+            val rawPassword = "myPassword123!"
+            val hashedPassword = tc.crypto.hashPassword(rawPassword)
+            val member = kr.co.archan.reflect.member.domain.Member.signUp(email, hashedPassword, "홍길동")
+            every { tc.memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns member
+            val request = LoginRequest(email, rawPassword)
 
-        // when & then
-        mockMvc.perform(
-            post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-        )
-            .andExpect(status().isOk)
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.accessToken").exists())
-            .andExpect(jsonPath("$.refreshToken").exists())
-            .andExpect(jsonPath("$.accessToken").isNotEmpty)
-            .andExpect(jsonPath("$.refreshToken").isNotEmpty)
+            When("로그인을 요청하면") {
+                Then("로그인이 성공하고 토큰이 반환된다") {
+                    tc.mockMvc.perform(
+                        post("/auth/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(tc.objectMapper.writeValueAsString(request))
+                    )
+                        .andExpect(status().isOk)
+                        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(jsonPath("$.accessToken").exists())
+                        .andExpect(jsonPath("$.refreshToken").exists())
+                        .andExpect(jsonPath("$.accessToken").isNotEmpty)
+                        .andExpect(jsonPath("$.refreshToken").isNotEmpty)
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("POST /auth/login - 존재하지 않는 이메일로 로그인 시 실패")
-    fun `POST auth login - 존재하지 않는 이메일로 로그인 시 실패`() {
-        // given
-        val email = "notfound@example.com"
-        val password = "anyPassword"
-        every { memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns null
-        
-        val request = LoginRequest(email, password)
+    context("POST /auth/login - 존재하지 않는 이메일로 로그인 시 실패") {
+        Given("존재하지 않는 이메일로 요청하고") {
+            val tc = createTestComponents()
+            
+            val email = "notfound@example.com"
+            val password = "anyPassword"
+            every { tc.memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns null
+            val request = LoginRequest(email, password)
 
-        // when & then
-        mockMvc.perform(
-            post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-        )
-            .andExpect(status().is4xxClientError)
+            When("로그인을 요청하면") {
+                Then("로그인이 실패하고 4xx 에러가 반환된다") {
+                    tc.mockMvc.perform(
+                        post("/auth/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(tc.objectMapper.writeValueAsString(request))
+                    )
+                        .andExpect(status().is4xxClientError)
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("POST /auth/login - 잘못된 비밀번호로 로그인 시 실패")
-    fun `POST auth login - 잘못된 비밀번호로 로그인 시 실패`() {
-        // given
-        val email = "user@example.com"
-        val correctPassword = "correctPassword123!"
-        val wrongPassword = "wrongPassword123!"
-        val hashedPassword = crypto.hashPassword(correctPassword)
-        
-        val member = Member.signUp(email, hashedPassword, "홍길동")
-        every { memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns member
-        
-        val request = LoginRequest(email, wrongPassword)
+    context("POST /auth/login - 잘못된 비밀번호로 로그인 시 실패") {
+        Given("잘못된 비밀번호로 요청하고") {
+            val tc = createTestComponents()
+            
+            val email = "user@example.com"
+            val correctPassword = "correctPassword123!"
+            val wrongPassword = "wrongPassword123!"
+            val hashedPassword = tc.crypto.hashPassword(correctPassword)
+            val member = kr.co.archan.reflect.member.domain.Member.signUp(email, hashedPassword, "홍길동")
+            every { tc.memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns member
+            val request = LoginRequest(email, wrongPassword)
 
-        // when & then
-        mockMvc.perform(
-            post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-        )
-            .andExpect(status().is4xxClientError)
+            When("로그인을 요청하면") {
+                Then("로그인이 실패하고 4xx 에러가 반환된다") {
+                    tc.mockMvc.perform(
+                        post("/auth/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(tc.objectMapper.writeValueAsString(request))
+                    )
+                        .andExpect(status().is4xxClientError)
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("POST /auth/login - 빈 이메일로 요청 시 검증 실패")
-    fun `POST auth login - 빈 이메일로 요청 시 검증 실패`() {
-        // given
-        val request = LoginRequest("", "password123!")
+    context("POST /auth/login - 빈 이메일로 요청 시 검증 실패") {
+        Given("빈 이메일로 요청하고") {
+            val tc = createTestComponents()
+            
+            val request = LoginRequest("", "password123!")
 
-        // when & then
-        mockMvc.perform(
-            post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-        )
-            .andExpect(status().is4xxClientError)
+            When("로그인을 요청하면") {
+                Then("검증이 실패하고 4xx 에러가 반환된다") {
+                    tc.mockMvc.perform(
+                        post("/auth/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(tc.objectMapper.writeValueAsString(request))
+                    )
+                        .andExpect(status().is4xxClientError)
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("POST /auth/login - 빈 비밀번호로 요청 시 검증 실패")
-    fun `POST auth login - 빈 비밀번호로 요청 시 검증 실패`() {
-        // given
-        val request = LoginRequest("user@example.com", "")
+    context("POST /auth/login - 빈 비밀번호로 요청 시 검증 실패") {
+        Given("빈 비밀번호로 요청하고") {
+            val tc = createTestComponents()
+            
+            val request = LoginRequest("user@example.com", "")
 
-        // when & then
-        mockMvc.perform(
-            post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-        )
-            .andExpect(status().is4xxClientError)
+            When("로그인을 요청하면") {
+                Then("검증이 실패하고 4xx 에러가 반환된다") {
+                    tc.mockMvc.perform(
+                        post("/auth/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(tc.objectMapper.writeValueAsString(request))
+                    )
+                        .andExpect(status().is4xxClientError)
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("POST /auth/login - 잘못된 JSON 형식으로 요청 시 실패")
-    fun `POST auth login - 잘못된 JSON 형식으로 요청 시 실패`() {
-        // when & then
-        mockMvc.perform(
-            post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"invalid\" \"json\"}")
-        )
-            .andExpect(status().is4xxClientError)
-    }
+    context("POST /auth/login - 잘못된 JSON 형식으로 요청 시 실패") {
+        Given("잘못된 JSON 형식으로 요청하고") {
+            val tc = createTestComponents()
 
-}
+            When("로그인을 요청하면") {
+                Then("JSON 파싱이 실패하고 4xx 에러가 반환된다") {
+                    tc.mockMvc.perform(
+                        post("/auth/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"invalid\" \"json\"}")
+                    )
+                        .andExpect(status().is4xxClientError)
+                }
+            }
+        }
+    }
+})

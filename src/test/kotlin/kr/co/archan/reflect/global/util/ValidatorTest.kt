@@ -1,310 +1,528 @@
 package kr.co.archan.reflect.global.util
 
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
+import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.shouldBe
 
+class ValidatorTest : BehaviorSpec({
 
-class ValidatorTest {
+    context("isEmailValid - 일반적인 이메일") {
+        Given("일반적인 이메일이 주어지고") {
+            val email = "test@example.com"
 
-    @Test
-    @DisplayName("isEmailValid 성공 - 일반적인 이메일")
-    fun `isEmailValid 성공 - 일반적인 이메일`() {
-        val email = "test@example.com"
+            When("검증하면") {
+                val result = Validator.isEmailValid(email)
 
-        assertTrue(Validator.isEmailValid(email))
+                Then("true가 반환된다") {
+                    result shouldBe true
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isEmailValid 성공 - 숫자와 특수문자 포함")
-    fun `isEmailValid 성공 - 숫자와 특수문자 포함`() {
-        val email = "user.name+tag123@example.co.kr"
+    context("isEmailValid - 숫자와 특수문자 포함") {
+        Given("숫자와 특수문자가 포함된 이메일이 주어지고") {
+            val email = "user.name+tag123@example.co.kr"
 
-        assertTrue(Validator.isEmailValid(email))
+            When("검증하면") {
+                val result = Validator.isEmailValid(email)
+
+                Then("true가 반환된다") {
+                    result shouldBe true
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isEmailValid 실패 - 이메일 공백")
-    fun `isEmailValid 실패 - 이메일 공백`() {
-        val email = ""
+    context("isEmailValid - 이메일 공백") {
+        Given("빈 이메일이 주어지고") {
+            val email = ""
 
-        assertFalse(Validator.isEmailValid(email))
+            When("검증하면") {
+                val result = Validator.isEmailValid(email)
+
+                Then("false가 반환된다") {
+                    result shouldBe false
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isEmailValid 실패 - @ 없음")
-    fun `isEmailValid 실패 - @ 없음`() {
-        val email = "testexample.com"
+    context("isEmailValid - @ 없음") {
+        Given("@ 기호가 없는 이메일이 주어지고") {
+            val email = "testexample.com"
 
-        assertFalse(Validator.isEmailValid(email))
+            When("검증하면") {
+                val result = Validator.isEmailValid(email)
+
+                Then("false가 반환된다") {
+                    result shouldBe false
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isEmailValid 실패 - 255자 이상")
-    fun `isEmailValid 실패 - 255자 이상`() {
-        val email =
-            "testasdfsdfsasdfdasasdfddasfdddudgfiausgdiufgisdugfiugasidugfiausgdfigusadftestasdfsdfsdfsdftsadfgsdgfiuagsidufgisudgfiausgdiufgisdugfiugasidugfiausgdfigusadftestasdfsdfsdfsdftsadfgsdgfiuagsidufgisudgfiausgdiufgisdugfiugasidugfiausgdfigusadfasdfdd@test.com"
+    context("isEmailValid - 255자 이상") {
+        Given("255자 이상의 이메일이 주어지고") {
+            val email =
+                "testasdfsdfsasdfdasasdfddasfdddudgfiausgdiufgisdugfiugasidugfiausgdfigusadftestasdfsdfsdfsdftsadfgsdgfiuagsidufgisudgfiausgdiufgisdugfiugasidugfiausgdfigusadftestasdfsdfsdfsdftsadfgsdgfiuagsidufgisudgfiausgdiufgisdugfiugasidugfiausgdfigusadfasdfdd@test.com"
 
-        assertFalse(Validator.isEmailValid(email))
+            When("검증하면") {
+                val result = Validator.isEmailValid(email)
+
+                Then("false가 반환된다") {
+                    result shouldBe false
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isEmailValid 실패 - 공백 포함")
-    fun `isEmailValid 실패 - 공백 포함`() {
-        val email = "test @example.com"
+    context("isEmailValid - 공백 포함") {
+        Given("공백이 포함된 이메일이 주어지고") {
+            val email = "test @example.com"
 
-        assertFalse(Validator.isEmailValid(email))
+            When("검증하면") {
+                val result = Validator.isEmailValid(email)
+
+                Then("false가 반환된다") {
+                    result shouldBe false
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isEmailValid 실패 - 로컬파트 없음")
-    fun `isEmailValid 실패 - 로컬파트 없음`() {
-        val email = "@example.com"
+    context("isEmailValid - 로컬파트 없음") {
+        Given("로컬파트가 없는 이메일이 주어지고") {
+            val email = "@example.com"
 
-        assertFalse(Validator.isEmailValid(email))
+            When("검증하면") {
+                val result = Validator.isEmailValid(email)
+
+                Then("false가 반환된다") {
+                    result shouldBe false
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isEmailValid 실패 - 도메인 없음")
-    fun `isEmailValid 실패 - 도메인 없음`() {
-        val email = "test@"
+    context("isEmailValid - 도메인 없음") {
+        Given("도메인이 없는 이메일이 주어지고") {
+            val email = "test@"
 
-        assertFalse(Validator.isEmailValid(email))
+            When("검증하면") {
+                val result = Validator.isEmailValid(email)
+
+                Then("false가 반환된다") {
+                    result shouldBe false
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isEmailValid 실패 - 도메인에 점으로 시작")
-    fun `isEmailValid 실패 - 도메인에 점으로 시작`() {
-        val email = "test@.example.com"
+    context("isEmailValid - 도메인에 점으로 시작") {
+        Given("도메인이 점으로 시작하는 이메일이 주어지고") {
+            val email = "test@.example.com"
 
-        assertFalse(Validator.isEmailValid(email))
+            When("검증하면") {
+                val result = Validator.isEmailValid(email)
+
+                Then("false가 반환된다") {
+                    result shouldBe false
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isEmailValid 실패 - 도메인에 점으로 끝남")
-    fun `isEmailValid 실패 - 도메인에 점으로 끝남`() {
-        val email = "test@example.com."
+    context("isEmailValid - 도메인에 점으로 끝남") {
+        Given("도메인이 점으로 끝나는 이메일이 주어지고") {
+            val email = "test@example.com."
 
-        assertFalse(Validator.isEmailValid(email))
+            When("검증하면") {
+                val result = Validator.isEmailValid(email)
+
+                Then("false가 반환된다") {
+                    result shouldBe false
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isEmailValid 실패 - 연속된 점")
-    fun `isEmailValid 실패 - 연속된 점`() {
-        val email = "test@example..com"
+    context("isEmailValid - 연속된 점") {
+        Given("연속된 점이 있는 이메일이 주어지고") {
+            val email = "test@example..com"
 
-        assertFalse(Validator.isEmailValid(email))
+            When("검증하면") {
+                val result = Validator.isEmailValid(email)
+
+                Then("false가 반환된다") {
+                    result shouldBe false
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isEmailValid 실패 - TLD 1글자")
-    fun `isEmailValid 실패 - TLD 1글자`() {
-        val email = "test@example.c"
+    context("isEmailValid - TLD 1글자") {
+        Given("TLD가 1글자인 이메일이 주어지고") {
+            val email = "test@example.c"
 
-        assertFalse(Validator.isEmailValid(email))
+            When("검증하면") {
+                val result = Validator.isEmailValid(email)
+
+                Then("false가 반환된다") {
+                    result shouldBe false
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isEmailValid 실패 - 로컬파트 65자 이상")
-    fun `isEmailValid 실패 - 로컬파트 65자 이상`() {
-        val email = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklm@example.com"
+    context("isEmailValid - 로컬파트 65자 이상") {
+        Given("로컬파트가 65자 이상인 이메일이 주어지고") {
+            val email = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklm@example.com"
 
-        assertFalse(Validator.isEmailValid(email))
+            When("검증하면") {
+                val result = Validator.isEmailValid(email)
+
+                Then("false가 반환된다") {
+                    result shouldBe false
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isEmailValid 실패 - 허용되지 않는 문자")
-    fun `isEmailValid 실패 - 허용되지 않는 문자`() {
-        val email = "test@#example.com"
+    context("isEmailValid - 허용되지 않는 문자") {
+        Given("허용되지 않는 문자가 포함된 이메일이 주어지고") {
+            val email = "test@#example.com"
 
-        assertFalse(Validator.isEmailValid(email))
+            When("검증하면") {
+                val result = Validator.isEmailValid(email)
+
+                Then("false가 반환된다") {
+                    result shouldBe false
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isEmailValid 실패 - 도메인 레이블 수 부족")
-    fun `isEmailValid 실패 - 도메인 레이블 수 부족`() {
-        val email = "test@example"
+    context("isEmailValid - 도메인 레이블 수 부족") {
+        Given("도메인 레이블 수가 부족한 이메일이 주어지고") {
+            val email = "test@example"
 
-        assertFalse(Validator.isEmailValid(email))
+            When("검증하면") {
+                val result = Validator.isEmailValid(email)
+
+                Then("false가 반환된다") {
+                    result shouldBe false
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isEmailValid 실패 - TLD에 숫자 포함")
-    fun `isEmailValid 실패 - TLD에 숫자 포함`() {
-        val email = "test@example.co2"
+    context("isEmailValid - TLD에 숫자 포함") {
+        Given("TLD에 숫자가 포함된 이메일이 주어지고") {
+            val email = "test@example.co2"
 
-        assertFalse(Validator.isEmailValid(email))
+            When("검증하면") {
+                val result = Validator.isEmailValid(email)
+
+                Then("false가 반환된다") {
+                    result shouldBe false
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isEmailValid 실패 - 로컬파트에 허용되지 않는 문자")
-    fun `isEmailValid 실패 - 로컬파트에 허용되지 않는 문자`() {
-        val email = "test@domain@example.com"
+    context("isEmailValid - 로컬파트에 허용되지 않는 문자") {
+        Given("로컬파트에 허용되지 않는 문자가 있는 이메일이 주어지고") {
+            val email = "test@domain@example.com"
 
-        assertFalse(Validator.isEmailValid(email))
+            When("검증하면") {
+                val result = Validator.isEmailValid(email)
+
+                Then("false가 반환된다") {
+                    result shouldBe false
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isEmailValid 실패 - 도메인에 허용되지 않는 문자")
-    fun `isEmailValid 실패 - 도메인에 허용되지 않는 문자`() {
-        val email = "test@exam_ple.com"
+    context("isEmailValid - 도메인에 허용되지 않는 문자") {
+        Given("도메인에 허용되지 않는 문자가 있는 이메일이 주어지고") {
+            val email = "test@exam_ple.com"
 
-        assertFalse(Validator.isEmailValid(email))
+            When("검증하면") {
+                val result = Validator.isEmailValid(email)
+
+                Then("false가 반환된다") {
+                    result shouldBe false
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isEmailValid 실패 - 여러 개의 @ 기호")
-    fun `isEmailValid 실패 - 여러 개의 @ 기호`() {
-        val email = "test@@example.com"
+    context("isEmailValid - 여러 개의 @ 기호") {
+        Given("여러 개의 @ 기호가 있는 이메일이 주어지고") {
+            val email = "test@@example.com"
 
-        assertFalse(Validator.isEmailValid(email))
+            When("검증하면") {
+                val result = Validator.isEmailValid(email)
+
+                Then("false가 반환된다") {
+                    result shouldBe false
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isEmailValid 실패 - @ 기호만")
-    fun `isEmailValid 실패 - @ 기호만`() {
-        val email = "@"
+    context("isEmailValid - @ 기호만") {
+        Given("@ 기호만 있는 이메일이 주어지고") {
+            val email = "@"
 
-        assertFalse(Validator.isEmailValid(email))
+            When("검증하면") {
+                val result = Validator.isEmailValid(email)
+
+                Then("false가 반환된다") {
+                    result shouldBe false
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isEmailValid 성공 - 경계값 254자")
-    fun `isEmailValid 성공 - 경계값 254자`() {
-        // 정확히 254자 이메일 구성
-        val localPart = "a".repeat(64)  // 64자 (최대값)
-        val domainPart = "b".repeat(63) + "." + "c".repeat(63) + "." + "d".repeat(57) + ".com"  // 188자
-        val email = "$localPart@$domainPart"  // 64 + 1 + 188 = 253자
+    context("isEmailValid - 경계값 254자") {
+        Given("254자 이메일이 주어지고") {
+            val localPart = "a".repeat(64)
+            val domainPart = "b".repeat(63) + "." + "c".repeat(63) + "." + "d".repeat(57) + ".com"
+            val email = "$localPart@$domainPart"
 
-        assertTrue(Validator.isEmailValid(email))
+            When("검증하면") {
+                val result = Validator.isEmailValid(email)
+
+                Then("true가 반환된다") {
+                    result shouldBe true
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isEmailValid 성공 - 로컬파트 경계값 64자")
-    fun `isEmailValid 성공 - 로컬파트 경계값 64자`() {
-        val email = "a".repeat(64) + "@example.com"
+    context("isEmailValid - 로컬파트 경계값 64자") {
+        Given("로컬파트가 64자인 이메일이 주어지고") {
+            val email = "a".repeat(64) + "@example.com"
 
-        assertTrue(Validator.isEmailValid(email))
+            When("검증하면") {
+                val result = Validator.isEmailValid(email)
+
+                Then("true가 반환된다") {
+                    result shouldBe true
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isEmailValid 성공 - TLD 경계값 2자")
-    fun `isEmailValid 성공 - TLD 경계값 2자`() {
-        val email = "test@example.co"
+    context("isEmailValid - TLD 경계값 2자") {
+        Given("TLD가 2자인 이메일이 주어지고") {
+            val email = "test@example.co"
 
-        assertTrue(Validator.isEmailValid(email))
+            When("검증하면") {
+                val result = Validator.isEmailValid(email)
+
+                Then("true가 반환된다") {
+                    result shouldBe true
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isNameValid 성공 - 일반적인 이름")
-    fun `isNameValid 성공 - 일반적인 이름`() {
-        val name = "홍길동"
+    context("isNameValid - 일반적인 이름") {
+        Given("일반적인 이름이 주어지고") {
+            val name = "홍길동"
 
-        assertTrue(Validator.isNameValid(name))
+            When("검증하면") {
+                val result = Validator.isNameValid(name)
+
+                Then("true가 반환된다") {
+                    result shouldBe true
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isNameValid 성공 - 영문 이름")
-    fun `isNameValid 성공 - 영문 이름`() {
-        val name = "John Doe"
+    context("isNameValid - 영문 이름") {
+        Given("영문 이름이 주어지고") {
+            val name = "John Doe"
 
-        assertTrue(Validator.isNameValid(name))
+            When("검증하면") {
+                val result = Validator.isNameValid(name)
+
+                Then("true가 반환된다") {
+                    result shouldBe true
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isNameValid 성공 - 20자 이름")
-    fun `isNameValid 성공 - 20자 이름`() {
-        val name = "가나다라마바사아자차카타파하가나다라마바"
+    context("isNameValid - 20자 이름") {
+        Given("20자 이름이 주어지고") {
+            val name = "가나다라마바사아자차카타파하가나다라마바"
 
-        assertTrue(Validator.isNameValid(name))
+            When("검증하면") {
+                val result = Validator.isNameValid(name)
+
+                Then("true가 반환된다") {
+                    result shouldBe true
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isNameValid 실패 - 이름 공백")
-    fun `isNameValid 실패 - 이름 공백`() {
-        val name = ""
+    context("isNameValid - 이름 공백") {
+        Given("빈 이름이 주어지고") {
+            val name = ""
 
-        assertFalse(Validator.isNameValid(name))
+            When("검증하면") {
+                val result = Validator.isNameValid(name)
+
+                Then("false가 반환된다") {
+                    result shouldBe false
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isNameValid 실패 - 이름 공백만")
-    fun `isNameValid 실패 - 이름 공백만`() {
-        val name = "   "
+    context("isNameValid - 이름 공백만") {
+        Given("공백만 있는 이름이 주어지고") {
+            val name = "   "
 
-        assertFalse(Validator.isNameValid(name))
+            When("검증하면") {
+                val result = Validator.isNameValid(name)
+
+                Then("false가 반환된다") {
+                    result shouldBe false
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isNameValid 실패 - 21자 이상")
-    fun `isNameValid 실패 - 21자 이상`() {
-        val name = "가나다라마바사아자차카타파하가나다라마바사"
+    context("isNameValid - 21자 이상") {
+        Given("21자 이상의 이름이 주어지고") {
+            val name = "가나다라마바사아자차카타파하가나다라마바사"
 
-        assertFalse(Validator.isNameValid(name))
+            When("검증하면") {
+                val result = Validator.isNameValid(name)
+
+                Then("false가 반환된다") {
+                    result shouldBe false
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isPasswordValid 성공 - 일반적인 패스워드")
-    fun `isPasswordValid 성공 - 일반적인 패스워드`() {
-        val password = "password123!"
+    context("isPasswordValid - 일반적인 패스워드") {
+        Given("일반적인 패스워드가 주어지고") {
+            val password = "password123!"
 
-        assertTrue(Validator.isPasswordValid(password))
+            When("검증하면") {
+                val result = Validator.isPasswordValid(password)
+
+                Then("true가 반환된다") {
+                    result shouldBe true
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isPasswordValid 실패 - 7자 이하")
-    fun `isPasswordValid 실패 - 7자 이하`() {
-        val password = "pass1!"
+    context("isPasswordValid - 7자 이하") {
+        Given("7자 이하의 패스워드가 주어지고") {
+            val password = "pass1!"
 
-        assertFalse(Validator.isPasswordValid(password))
+            When("검증하면") {
+                val result = Validator.isPasswordValid(password)
+
+                Then("false가 반환된다") {
+                    result shouldBe false
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isPasswordValid 실패 - 65자 이상")
-    fun `isPasswordValid 실패 - 65자 이상`() {
-        val password = "a".repeat(63) + "1!"
+    context("isPasswordValid - 65자 이상") {
+        Given("65자 이상의 패스워드가 주어지고") {
+            val password = "a".repeat(63) + "1!"
 
-        assertFalse(Validator.isPasswordValid(password))
+            When("검증하면") {
+                val result = Validator.isPasswordValid(password)
+
+                Then("false가 반환된다") {
+                    result shouldBe false
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isPasswordValid 실패 - 숫자 없음")
-    fun `isPasswordValid 실패 - 숫자 없음`() {
-        val password = "passwordwithoutdigit!"
+    context("isPasswordValid - 숫자 없음") {
+        Given("숫자가 없는 패스워드가 주어지고") {
+            val password = "passwordwithoutdigit!"
 
-        assertFalse(Validator.isPasswordValid(password))
+            When("검증하면") {
+                val result = Validator.isPasswordValid(password)
+
+                Then("false가 반환된다") {
+                    result shouldBe false
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isPasswordValid 실패 - 특수문자 없음")
-    fun `isPasswordValid 실패 - 특수문자 없음`() {
-        val password = "passwordwithoutspecial123"
+    context("isPasswordValid - 특수문자 없음") {
+        Given("특수문자가 없는 패스워드가 주어지고") {
+            val password = "passwordwithoutspecial123"
 
-        assertFalse(Validator.isPasswordValid(password))
+            When("검증하면") {
+                val result = Validator.isPasswordValid(password)
+
+                Then("false가 반환된다") {
+                    result shouldBe false
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isPasswordValid 실패 - 숫자와 특수문자 모두 없음")
-    fun `isPasswordValid 실패 - 숫자와 특수문자 모두 없음`() {
-        val password = "passwordonly"
+    context("isPasswordValid - 숫자와 특수문자 모두 없음") {
+        Given("숫자와 특수문자가 모두 없는 패스워드가 주어지고") {
+            val password = "passwordonly"
 
-        assertFalse(Validator.isPasswordValid(password))
+            When("검증하면") {
+                val result = Validator.isPasswordValid(password)
+
+                Then("false가 반환된다") {
+                    result shouldBe false
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isPasswordValid 실패 - 빈 문자열")
-    fun `isPasswordValid 실패 - 빈 문자열`() {
-        val password = ""
+    context("isPasswordValid - 빈 문자열") {
+        Given("빈 패스워드가 주어지고") {
+            val password = ""
 
-        assertFalse(Validator.isPasswordValid(password))
+            When("검증하면") {
+                val result = Validator.isPasswordValid(password)
+
+                Then("false가 반환된다") {
+                    result shouldBe false
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("isPasswordValid 실패 - 공백 포함")
-    fun `isPasswordValid 실패 - 공백 포함`() {
-        val password = "password 123"
+    context("isPasswordValid - 공백 포함") {
+        Given("공백이 포함된 패스워드가 주어지고") {
+            val password = "password 123"
 
-        assertFalse(Validator.isPasswordValid(password))
+            When("검증하면") {
+                val result = Validator.isPasswordValid(password)
+
+                Then("false가 반환된다") {
+                    result shouldBe false
+                }
+            }
+        }
     }
-
-}
+})

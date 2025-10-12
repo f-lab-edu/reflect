@@ -1,6 +1,10 @@
 package kr.co.archan.reflect.auth.service
 
 import com.nimbusds.jwt.SignedJWT
+import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.assertions.throwables.shouldThrow
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -17,216 +21,208 @@ import kr.co.archan.reflect.member.exception.common.MemberException
 import kr.co.archan.reflect.member.exception.types.MemberErrorCode
 import kr.co.archan.reflect.member.repository.MemberRepository
 import kr.co.archan.reflect.member.service.MemberService
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.assertThrows
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder
-import org.springframework.security.crypto.password.PasswordEncoder
 
-class AuthServiceTest {
-
-    private lateinit var authService: AuthService
-    private lateinit var memberService: MemberService
-    private lateinit var tokenService: TokenService
-    private lateinit var crypto: Crypto
+class AuthServiceTest : BehaviorSpec({
     
-    // Mock 필요한 외부 의존성
-    private lateinit var memberRepository: MemberRepository
-    private lateinit var jwtProperties: JwtProperties
-    private lateinit var refreshTokenRepository: RefreshTokenRepository
-    private lateinit var cryptoProperties: CryptoProperties
-    private lateinit var passwordEncoder: PasswordEncoder
-
-    @BeforeEach
-    fun setUp() {
-        // Properties 모킹
-        jwtProperties = mockk {
+    fun createTestComponents() = object {
+        val jwtProperties = mockk<JwtProperties> {
             every { issuer } returns "test-issuer"
             every { audience } returns "test-audience"
             every { secret } returns "test-secret-key-for-jwt-signing-must-be-long-enough-at-least-256-bits"
             every { accessTokenTtlSeconds } returns 3600L
             every { refreshTokenTtlSeconds } returns 1209600L
         }
-        
-        cryptoProperties = mockk {
-            every { hashKey } returns "test-hash-key"
-            every { pepperKey } returns "test-pepper"
-        }
-        
-        // 외부 저장소 모킹
-        memberRepository = mockk()
-        refreshTokenRepository = mockk(relaxed = true)
-        
-        // 실제 PasswordEncoder 사용
-        passwordEncoder = Argon2PasswordEncoder(16, 32, 1, 64 * 1024, 3)
-
-        crypto = Crypto(cryptoProperties, passwordEncoder)
-        
+        val cryptoProperties = CryptoProperties(
+            hashKey = "test-hash-key",
+            pepperKey = "test-pepper"
+        )
+        val memberRepository = mockk<MemberRepository>()
+        val refreshTokenRepository = mockk<RefreshTokenRepository>(relaxed = true)
+        val passwordEncoder = Argon2PasswordEncoder(16, 32, 1, 64 * 1024, 3)
+        val crypto = Crypto(cryptoProperties, passwordEncoder)
         val accessTokenProvider = AccessTokenProvider(jwtProperties)
         val refreshTokenProvider = RefreshTokenProvider(jwtProperties, refreshTokenRepository)
-        
-        tokenService = TokenService(accessTokenProvider, refreshTokenProvider)
-        memberService = MemberService(memberRepository)
-        authService = AuthService(memberService, tokenService, crypto)
+        val tokenService = TokenService(accessTokenProvider, refreshTokenProvider)
+        val memberService = MemberService(memberRepository)
+        val authService = AuthService(memberService, tokenService, crypto)
     }
 
-    @Test
-    @DisplayName("loginMember - 올바른 이메일과 비밀번호로 로그인 성공")
-    fun `loginMember - 올바른 이메일과 비밀번호로 로그인 성공`() {
-        // given
-        val email = "user@example.com"
-        val rawPassword = "myPassword123!"
-        val hashedPassword = crypto.hashPassword(rawPassword)
-        
-        val member = Member.signUp(email, hashedPassword, "홍길동")
-        every { memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns member
+    context("loginMember - 올바른 이메일과 비밀번호로 로그인 성공") {
+        Given("올바른 이메일과 비밀번호를 가진 회원이 있고") {
+            val tc = createTestComponents()
+            
+            val email = "user@example.com"
+            val rawPassword = "myPassword123!"
+            val hashedPassword = tc.crypto.hashPassword(rawPassword)
+            val member = Member.signUp(email, hashedPassword, "홍길동")
+            every { tc.memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns member
 
-        // when
-        val result = authService.loginMember(email, rawPassword)
+            When("로그인을 시도하면") {
+                val result = tc.authService.loginMember(email, rawPassword)
 
-        // then
-        assertNotNull(result)
-        assertNotNull(result.accessToken)
-        assertNotNull(result.refreshToken)
-        
-        // JWT 검증
-        val jwt = SignedJWT.parse(result.accessToken.value)
-        assertEquals(email, jwt.jwtClaimsSet.getStringClaim("email"))
-        assertEquals(member.id.toString(), jwt.jwtClaimsSet.subject)
-        
-        // Repository 호출 검증
-        verify(exactly = 1) { memberRepository.findByEmailAndIsWithdrawnFalse(email) }
-        verify(exactly = 1) { refreshTokenRepository.save(any()) }
-    }
-
-    @Test
-    @DisplayName("loginMember - 존재하지 않는 이메일로 로그인 시 MemberNotFoundException 발생")
-    fun `loginMember - 존재하지 않는 이메일로 로그인 시 MemberNotFoundException 발생`() {
-        // given
-        val email = "notfound@example.com"
-        val password = "anyPassword"
-        every { memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns null
-
-        // when & then
-        val exception = assertThrows<MemberException> {
-            authService.loginMember(email, password)
+                Then("로그인이 성공하고 토큰이 발급된다") {
+                    result shouldNotBe null
+                    result.accessToken shouldNotBe null
+                    result.refreshToken shouldNotBe null
+                    
+                    // JWT 검증
+                    val jwt = SignedJWT.parse(result.accessToken.value)
+                    jwt.jwtClaimsSet.getStringClaim("email") shouldBe email
+                    jwt.jwtClaimsSet.subject shouldBe member.id.toString()
+                    
+                    // Repository 호출 검증
+                    verify(exactly = 1) { tc.memberRepository.findByEmailAndIsWithdrawnFalse(email) }
+                    verify(exactly = 1) { tc.refreshTokenRepository.save(any()) }
+                }
+            }
         }
-        
-        // ErrorCode 검증
-        assertEquals(MemberErrorCode.MEMBER_NOT_FOUND, exception.apiErrorSpec)
-        
-        verify(exactly = 1) { memberRepository.findByEmailAndIsWithdrawnFalse(email) }
     }
 
-    @Test
-    @DisplayName("loginMember - 잘못된 비밀번호로 로그인 시 WrongPasswordException 발생")
-    fun `loginMember - 잘못된 비밀번호로 로그인 시 WrongPasswordException 발생`() {
-        // given
-        val email = "user@example.com"
-        val correctPassword = "correctPassword123!"
-        val wrongPassword = "wrongPassword123!"
-        val hashedPassword = crypto.hashPassword(correctPassword)
-        
-        val member = Member.signUp(email, hashedPassword, "홍길동")
-        every { memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns member
+    context("loginMember - 존재하지 않는 이메일로 로그인 시 MemberNotFoundException 발생") {
+        Given("존재하지 않는 이메일로 로그인을 시도하고") {
+            val tc = createTestComponents()
+            
+            val email = "notfound@example.com"
+            val password = "anyPassword"
+            every { tc.memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns null
 
-        // when & then
-        val exception = assertThrows<AuthException> {
-            authService.loginMember(email, wrongPassword)
+            When("로그인을 시도하면") {
+                Then("MemberNotFoundException이 발생한다") {
+                    val exception = shouldThrow<MemberException> {
+                        tc.authService.loginMember(email, password)
+                    }
+                    
+                    // ErrorCode 검증
+                    exception.apiErrorSpec shouldBe MemberErrorCode.MEMBER_NOT_FOUND
+                    
+                    verify(exactly = 1) { tc.memberRepository.findByEmailAndIsWithdrawnFalse(email) }
+                }
+            }
         }
-        
-        // ErrorCode 검증
-        assertEquals(AuthErrorCode.WRONG_PASSWORD, exception.apiErrorSpec)
-        
-        verify(exactly = 1) { memberRepository.findByEmailAndIsWithdrawnFalse(email) }
     }
 
-    @Test
-    @DisplayName("loginMember - 같은 회원이 여러 번 로그인 가능")
-    fun `loginMember - 같은 회원이 여러 번 로그인 가능`() {
-        // given
-        val email = "repeat@example.com"
-        val password = "password123!"
-        val hashedPassword = crypto.hashPassword(password)
-        
-        val member = Member.signUp(email, hashedPassword, "반복로그인")
-        every { memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns member
+    context("loginMember - 잘못된 비밀번호로 로그인 시 WrongPasswordException 발생") {
+        Given("잘못된 비밀번호로 로그인을 시도하고") {
+            val tc = createTestComponents()
+            
+            val email = "user@example.com"
+            val correctPassword = "correctPassword123!"
+            val wrongPassword = "wrongPassword123!"
+            val hashedPassword = tc.crypto.hashPassword(correctPassword)
+            val member = Member.signUp(email, hashedPassword, "홍길동")
+            every { tc.memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns member
 
-        // when
-        val result1 = authService.loginMember(email, password)
-        val result2 = authService.loginMember(email, password)
-        val result3 = authService.loginMember(email, password)
-
-        // then
-        // 매번 다른 토큰 발급
-        assertNotEquals(result1.accessToken.value, result2.accessToken.value)
-        assertNotEquals(result2.accessToken.value, result3.accessToken.value)
-        assertNotEquals(result1.refreshToken.value, result2.refreshToken.value)
-        
-        verify(exactly = 3) { memberRepository.findByEmailAndIsWithdrawnFalse(email) }
-        verify(exactly = 3) { refreshTokenRepository.save(any()) }
-    }
-
-    @Test
-    @DisplayName("loginMember - 대소문자가 다른 비밀번호는 실패")
-    fun `loginMember - 대소문자가 다른 비밀번호는 실패`() {
-        // given
-        val email = "case@example.com"
-        val correctPassword = "Password123!"
-        val wrongPassword = "password123!"  // 대소문자 다름
-        val hashedPassword = crypto.hashPassword(correctPassword)
-        
-        val member = Member.signUp(email, hashedPassword, "대소문자")
-        every { memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns member
-
-        // when & then
-        val exception = assertThrows<AuthException> {
-            authService.loginMember(email, wrongPassword)
+            When("로그인을 시도하면") {
+                Then("WrongPasswordException이 발생한다") {
+                    val exception = shouldThrow<AuthException> {
+                        tc.authService.loginMember(email, wrongPassword)
+                    }
+                    
+                    // ErrorCode 검증
+                    exception.apiErrorSpec shouldBe AuthErrorCode.WRONG_PASSWORD
+                    
+                    verify(exactly = 1) { tc.memberRepository.findByEmailAndIsWithdrawnFalse(email) }
+                }
+            }
         }
-        
-        // ErrorCode 검증
-        assertEquals(AuthErrorCode.WRONG_PASSWORD, exception.apiErrorSpec)
     }
 
-    @Test
-    @DisplayName("loginMember - 특수문자가 포함된 비밀번호 검증")
-    fun `loginMember - 특수문자가 포함된 비밀번호 검증`() {
-        // given
-        val email = "special@example.com"
-        val password = "P@ssw0rd!#$%^&*()"
-        val hashedPassword = crypto.hashPassword(password)
-        
-        val member = Member.signUp(email, hashedPassword, "특수문자")
-        every { memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns member
+    context("loginMember - 같은 회원이 여러 번 로그인 가능") {
+        Given("같은 회원이 있고") {
+            val tc = createTestComponents()
+            
+            val email = "repeat@example.com"
+            val password = "password123!"
+            val hashedPassword = tc.crypto.hashPassword(password)
+            val member = Member.signUp(email, hashedPassword, "반복로그인")
+            every { tc.memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns member
 
-        // when
-        val result = authService.loginMember(email, password)
+            When("여러 번 로그인을 시도하면") {
+                val result1 = tc.authService.loginMember(email, password)
+                val result2 = tc.authService.loginMember(email, password)
+                val result3 = tc.authService.loginMember(email, password)
 
-        // then
-        assertNotNull(result)
-        assertNotNull(result.accessToken)
-        assertNotNull(result.refreshToken)
-    }
-
-    @Test
-    @DisplayName("loginMember - 탈퇴한 회원은 로그인 불가")
-    fun `loginMember - 탈퇴한 회원은 로그인 불가`() {
-        // given
-        val email = "withdrawn@example.com"
-        val password = "password123!"
-        // 탈퇴한 회원이므로 repository에서 null 반환
-        every { memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns null
-
-        // when & then
-        val exception = assertThrows<MemberException> {
-            authService.loginMember(email, password)
+                Then("매번 다른 토큰이 발급된다") {
+                    // 매번 다른 토큰 발급
+                    result1.accessToken.value shouldNotBe result2.accessToken.value
+                    result2.accessToken.value shouldNotBe result3.accessToken.value
+                    result1.refreshToken.value shouldNotBe result2.refreshToken.value
+                    
+                    verify(exactly = 3) { tc.memberRepository.findByEmailAndIsWithdrawnFalse(email) }
+                    verify(exactly = 3) { tc.refreshTokenRepository.save(any()) }
+                }
+            }
         }
-        
-        // ErrorCode 검증
-        assertEquals(MemberErrorCode.MEMBER_NOT_FOUND, exception.apiErrorSpec)
-        
-        verify(exactly = 1) { memberRepository.findByEmailAndIsWithdrawnFalse(email) }
     }
-}
+
+    context("loginMember - 대소문자가 다른 비밀번호는 실패") {
+        Given("대소문자가 다른 비밀번호로 로그인을 시도하고") {
+            val tc = createTestComponents()
+            
+            val email = "case@example.com"
+            val correctPassword = "Password123!"
+            val wrongPassword = "password123!"  // 대소문자 다름
+            val hashedPassword = tc.crypto.hashPassword(correctPassword)
+            val member = Member.signUp(email, hashedPassword, "대소문자")
+            every { tc.memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns member
+
+            When("로그인을 시도하면") {
+                Then("WrongPasswordException이 발생한다") {
+                    val exception = shouldThrow<AuthException> {
+                        tc.authService.loginMember(email, wrongPassword)
+                    }
+                    
+                    // ErrorCode 검증
+                    exception.apiErrorSpec shouldBe AuthErrorCode.WRONG_PASSWORD
+                }
+            }
+        }
+    }
+
+    context("loginMember - 특수문자가 포함된 비밀번호 검증") {
+        Given("특수문자가 포함된 비밀번호를 가진 회원이 있고") {
+            val tc = createTestComponents()
+            
+            val email = "special@example.com"
+            val password = "P@ssw0rd!#$%^&*()"
+            val hashedPassword = tc.crypto.hashPassword(password)
+            val member = Member.signUp(email, hashedPassword, "특수문자")
+            every { tc.memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns member
+
+            When("로그인을 시도하면") {
+                val result = tc.authService.loginMember(email, password)
+
+                Then("로그인이 성공한다") {
+                    result shouldNotBe null
+                    result.accessToken shouldNotBe null
+                    result.refreshToken shouldNotBe null
+                }
+            }
+        }
+    }
+
+    context("loginMember - 탈퇴한 회원은 로그인 불가") {
+        Given("탈퇴한 회원이 있고") {
+            val tc = createTestComponents()
+            
+            val email = "withdrawn@example.com"
+            val password = "password123!"
+            // 탈퇴한 회원이므로 repository에서 null 반환
+            every { tc.memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns null
+
+            When("로그인을 시도하면") {
+                Then("MemberNotFoundException이 발생한다") {
+                    val exception = shouldThrow<MemberException> {
+                        tc.authService.loginMember(email, password)
+                    }
+                    
+                    // ErrorCode 검증
+                    exception.apiErrorSpec shouldBe MemberErrorCode.MEMBER_NOT_FOUND
+                    
+                    verify(exactly = 1) { tc.memberRepository.findByEmailAndIsWithdrawnFalse(email) }
+                }
+            }
+        }
+    }
+})
