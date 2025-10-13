@@ -1,161 +1,191 @@
 package kr.co.archan.reflect.unit.member.dto.vo
 
+import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.string.shouldContain
 import kr.co.archan.reflect.member.dto.vo.HashedPassword
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Assertions.*
 
-class HashedPasswordTest {
+class HashedPasswordTest : BehaviorSpec({
 
-    @Test
-    @DisplayName("HashedPassword 생성 및 프로퍼티 접근")
-    fun `HashedPassword 생성 및 프로퍼티 접근`() {
-        // given
-        val passwordValue = "hashedPassword123"
+    context("HashedPassword 생성 및 프로퍼티 접근") {
+        Given("패스워드 값이 주어지고") {
+            val passwordValue = "hashedPassword123"
 
-        // when
-        val hashedPassword = HashedPassword(passwordValue)
+            When("HashedPassword를 생성하면") {
+                val hashedPassword = HashedPassword(passwordValue)
 
-        // then
-        assertEquals(passwordValue, hashedPassword.value)
+                Then("값이 올바르게 설정된다") {
+                    hashedPassword.value shouldBe passwordValue
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("equals - 같은 값을 가진 HashedPassword는 동등함")
-    fun `equals - 같은 값을 가진 HashedPassword는 동등함`() {
-        // given
-        val password1 = HashedPassword("same-hashed-password")
-        val password2 = HashedPassword("same-hashed-password")
+    context("equals - 같은 값을 가진 HashedPassword는 동등함") {
+        Given("같은 값을 가진 두 개의 HashedPassword가 있고") {
+            val password1 = HashedPassword("same-hashed-password")
+            val password2 = HashedPassword("same-hashed-password")
 
-        // when & then
-        assertEquals(password1, password2)
-        assertTrue(password1 == password2)
+            When("두 객체를 비교하면") {
+                val result = password1 == password2
+
+                Then("동등하다") {
+                    result shouldBe true
+                    password1 shouldBe password2
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("equals - 다른 값을 가진 HashedPassword는 동등하지 않음")
-    fun `equals - 다른 값을 가진 HashedPassword는 동등하지 않음`() {
-        // given
-        val password1 = HashedPassword("hashed-password-1")
-        val password2 = HashedPassword("hashed-password-2")
+    context("equals - 다른 값을 가진 HashedPassword는 동등하지 않음") {
+        Given("다른 값을 가진 두 개의 HashedPassword가 있고") {
+            val password1 = HashedPassword("hashed-password-1")
+            val password2 = HashedPassword("hashed-password-2")
 
-        // when & then
-        assertNotEquals(password1, password2)
-        assertFalse(password1 == password2)
+            When("두 객체를 비교하면") {
+                val result = password1 == password2
+
+                Then("동등하지 않다") {
+                    result shouldBe false
+                    password1 shouldNotBe password2
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("hashCode - 같은 값을 가진 HashedPassword는 같은 hashCode")
-    fun `hashCode - 같은 값을 가진 HashedPassword는 같은 hashCode`() {
-        // given
-        val password1 = HashedPassword("hashed-password")
-        val password2 = HashedPassword("hashed-password")
+    context("hashCode - 같은 값을 가진 HashedPassword는 같은 hashCode") {
+        Given("같은 값을 가진 두 개의 HashedPassword가 있고") {
+            val password1 = HashedPassword("hashed-password")
+            val password2 = HashedPassword("hashed-password")
 
-        // when & then
-        assertEquals(password1.hashCode(), password2.hashCode())
+            When("hashCode를 비교하면") {
+                val hashCode1 = password1.hashCode()
+                val hashCode2 = password2.hashCode()
+
+                Then("같은 hashCode를 가진다") {
+                    hashCode1 shouldBe hashCode2
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("hashCode - 다른 값을 가진 HashedPassword는 다른 hashCode")
-    fun `hashCode - 다른 값을 가진 HashedPassword는 다른 hashCode`() {
-        // given
-        val password1 = HashedPassword("hashed-password-1")
-        val password2 = HashedPassword("hashed-password-2")
+    context("hashCode - 다른 값을 가진 HashedPassword는 다른 hashCode") {
+        Given("다른 값을 가진 두 개의 HashedPassword가 있고") {
+            val password1 = HashedPassword("hashed-password-1")
+            val password2 = HashedPassword("hashed-password-2")
 
-        // when & then
-        assertNotEquals(password1.hashCode(), password2.hashCode())
+            When("hashCode를 비교하면") {
+                val hashCode1 = password1.hashCode()
+                val hashCode2 = password2.hashCode()
+
+                Then("다른 hashCode를 가진다") {
+                    hashCode1 shouldNotBe hashCode2
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("toString - 문자열 표현 포함")
-    fun `toString - 문자열 표현 포함`() {
-        // given
-        val passwordValue = "hashed-password-value"
-        val hashedPassword = HashedPassword(passwordValue)
+    context("toString - 문자열 표현 포함") {
+        Given("HashedPassword가 있고") {
+            val passwordValue = "hashed-password-value"
+            val hashedPassword = HashedPassword(passwordValue)
 
-        // when
-        val result = hashedPassword.toString()
+            When("toString을 호출하면") {
+                val result = hashedPassword.toString()
 
-        // then
-        assertNotNull(result)
-        assertTrue(result.contains("HashedPassword") || result.contains(passwordValue))
+                Then("문자열 표현이 포함된다") {
+                    result shouldNotBe null
+                    (result.contains("HashedPassword") || result.contains(passwordValue)) shouldBe true
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("빈 문자열로 HashedPassword 생성 가능")
-    fun `빈 문자열로 HashedPassword 생성 가능`() {
-        // given & when
-        val hashedPassword = HashedPassword("")
+    context("빈 문자열로 HashedPassword 생성 가능") {
+        Given("빈 문자열이 주어지고") {
+            val emptyString = ""
 
-        // then
-        assertEquals("", hashedPassword.value)
+            When("HashedPassword를 생성하면") {
+                val hashedPassword = HashedPassword(emptyString)
+
+                Then("빈 값이 설정된다") {
+                    hashedPassword.value shouldBe ""
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("매우 긴 해시 값 처리")
-    fun `매우 긴 해시 값 처리`() {
-        // given
-        val longHashValue = "a".repeat(1000)
+    context("매우 긴 해시 값 처리") {
+        Given("매우 긴 해시 값이 주어지고") {
+            val longHashValue = "a".repeat(1000)
 
-        // when
-        val hashedPassword = HashedPassword(longHashValue)
+            When("HashedPassword를 생성하면") {
+                val hashedPassword = HashedPassword(longHashValue)
 
-        // then
-        assertEquals(1000, hashedPassword.value.length)
-        assertEquals(longHashValue, hashedPassword.value)
+                Then("긴 값이 올바르게 저장된다") {
+                    hashedPassword.value.length shouldBe 1000
+                    hashedPassword.value shouldBe longHashValue
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("Set에서 중복 제거 - equals와 hashCode 활용")
-    fun `Set에서 중복 제거 - equals와 hashCode 활용`() {
-        // given
-        val password1 = HashedPassword("hashed-password")
-        val password2 = HashedPassword("hashed-password")
-        val password3 = HashedPassword("different-hashed-password")
+    context("Set에서 중복 제거 - equals와 hashCode 활용") {
+        Given("같은 값과 다른 값을 가진 HashedPassword들이 있고") {
+            val password1 = HashedPassword("hashed-password")
+            val password2 = HashedPassword("hashed-password")
+            val password3 = HashedPassword("different-hashed-password")
 
-        // when
-        val passwordSet = setOf(password1, password2, password3)
+            When("Set으로 변환하면") {
+                val passwordSet = setOf(password1, password2, password3)
 
-        // then
-        assertEquals(2, passwordSet.size)
-        assertTrue(passwordSet.contains(password1))
-        assertTrue(passwordSet.contains(password3))
+                Then("중복이 제거된다") {
+                    passwordSet.size shouldBe 2
+                    passwordSet shouldContain password1
+                    passwordSet shouldContain password3
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("Map의 키로 사용 가능")
-    fun `Map의 키로 사용 가능`() {
-        // given
-        val password1 = HashedPassword("key-password-1")
-        val password2 = HashedPassword("key-password-2")
-        val map = mutableMapOf<HashedPassword, String>()
+    context("Map의 키로 사용 가능") {
+        Given("두 개의 다른 HashedPassword가 있고") {
+            val password1 = HashedPassword("key-password-1")
+            val password2 = HashedPassword("key-password-2")
+            val map = mutableMapOf<HashedPassword, String>()
 
-        // when
-        map[password1] = "value1"
-        map[password2] = "value2"
+            When("Map의 키로 사용하면") {
+                map[password1] = "value1"
+                map[password2] = "value2"
 
-        // then
-        assertEquals(2, map.size)
-        assertEquals("value1", map[password1])
-        assertEquals("value2", map[password2])
+                Then("각각의 키로 값을 저장할 수 있다") {
+                    map.size shouldBe 2
+                    map[password1] shouldBe "value1"
+                    map[password2] shouldBe "value2"
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("동일한 키로 Map 값 덮어쓰기")
-    fun `동일한 키로 Map 값 덮어쓰기`() {
-        // given
-        val password1 = HashedPassword("same-key")
-        val password2 = HashedPassword("same-key")
-        val map = mutableMapOf<HashedPassword, String>()
+    context("동일한 키로 Map 값 덮어쓰기") {
+        Given("같은 값을 가진 두 개의 HashedPassword가 있고") {
+            val password1 = HashedPassword("same-key")
+            val password2 = HashedPassword("same-key")
+            val map = mutableMapOf<HashedPassword, String>()
 
-        // when
-        map[password1] = "value1"
-        map[password2] = "value2"
+            When("같은 키로 Map에 값을 저장하면") {
+                map[password1] = "value1"
+                map[password2] = "value2"
 
-        // then
-        assertEquals(1, map.size)
-        assertEquals("value2", map[password1])
-        assertEquals("value2", map[password2])
+                Then("값이 덮어써진다") {
+                    map.size shouldBe 1
+                    map[password1] shouldBe "value2"
+                    map[password2] shouldBe "value2"
+                }
+            }
+        }
     }
 
-}
+})

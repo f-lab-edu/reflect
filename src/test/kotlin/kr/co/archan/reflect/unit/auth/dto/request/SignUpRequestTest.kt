@@ -1,288 +1,316 @@
 package kr.co.archan.reflect.unit.auth.dto.request
 
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
+import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.string.shouldContain
 import jakarta.validation.Validation
 import jakarta.validation.Validator
-<<<<<<<< HEAD:src/test/kotlin/kr/co/archan/reflect/unit/auth/dto/request/SignUpRequestTest.kt
 import kr.co.archan.reflect.auth.dto.request.SignUpRequest
-========
-import kr.co.archan.reflect.auth.dto.request.LoginRequest
->>>>>>>> 8f90f043d7ddcabb11cf3af554c7f4d4413b218c:src/test/kotlin/kr/co/archan/reflect/unit/auth/dto/request/LoginRequestTest.kt
 
-class SignUpRequestTest {
+class SignUpRequestTest : BehaviorSpec({
 
-    private val validator: Validator = Validation.buildDefaultValidatorFactory().validator
+    val validator: Validator = Validation.buildDefaultValidatorFactory().validator
 
-    @Test
-    @DisplayName("SignUpRequest 생성 성공")
-    fun `SignUpRequest 생성 성공`() {
-        // given
-        val email = "test@example.com"
-        val password = "securePassword123!"
-        val name = "홍길동"
+    context("SignUpRequest 생성 성공") {
+        Given("유효한 이메일, 패스워드, 이름이 주어지고") {
+            val email = "test@example.com"
+            val password = "securePassword123!"
+            val name = "홍길동"
 
-        // when
-        val request = SignUpRequest(email, password, name)
+            When("SignUpRequest를 생성하면") {
+                val request = SignUpRequest(email, password, name)
 
-        // then
-        assertAll("SignUpRequest 생성",
-            { assertEquals(email, request.email) },
-            { assertEquals(password, request.password) },
-            { assertEquals(name, request.name) }
-        )
+                Then("모든 값이 올바르게 설정된다") {
+                    request.email shouldBe email
+                    request.password shouldBe password
+                    request.name shouldBe name
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("검증 성공 - 유효한 이메일, 패스워드, 이름")
-    fun `검증 성공 - 유효한 이메일, 패스워드, 이름`() {
-        // given
-        val request = SignUpRequest("valid@example.com", "validPass123!", "홍길동")
+    context("검증 성공 - 유효한 이메일, 패스워드, 이름") {
+        Given("유효한 SignUpRequest가 있고") {
+            val request = SignUpRequest("valid@example.com", "validPass123!", "홍길동")
 
-        // when
-        val violations = validator.validate(request)
+            When("검증하면") {
+                val violations = validator.validate(request)
 
-        // then
-        assertTrue(violations.isEmpty())
+                Then("검증 에러가 없다") {
+                    violations.shouldBeEmpty()
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("이메일 검증 실패 - 이메일 공백")
-    fun `이메일 검증 실패 - 이메일 공백`() {
-        // given
-        val email = ""
-        val password = "securePassword123!"
-        val name = "홍길동"
+    context("이메일 검증 실패 - 이메일 공백") {
+        Given("빈 이메일이 주어지고") {
+            val email = ""
+            val password = "securePassword123!"
+            val name = "홍길동"
 
-        // when
-        val violations = validator.validate(SignUpRequest(email, password, name))
+            When("SignUpRequest를 검증하면") {
+                val violations = validator.validate(SignUpRequest(email, password, name))
 
-        // then
-        assertTrue(violations.isNotEmpty())
-        assertTrue(violations.any { it.propertyPath.toString() == "email" })
+                Then("이메일 검증 에러가 발생한다") {
+                    violations.shouldNotBeEmpty()
+                    violations.any { it.propertyPath.toString() == "email" } shouldBe true
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("이메일 검증 실패 - @ 없음")
-    fun `이메일 검증 실패 - @ 없음`() {
-        // given
-        val email = "invalid-email"
-        val password = "securePassword123!"
-        val name = "홍길동"
+    context("이메일 검증 실패 - @ 없음") {
+        Given("@가 없는 이메일이 주어지고") {
+            val email = "invalid-email"
+            val password = "securePassword123!"
+            val name = "홍길동"
 
-        // when
-        val violations = validator.validate(SignUpRequest(email, password, name))
+            When("SignUpRequest를 검증하면") {
+                val violations = validator.validate(SignUpRequest(email, password, name))
 
-        // then
-        assertTrue(violations.isNotEmpty())
-        assertTrue(violations.any { it.propertyPath.toString() == "email" })
+                Then("이메일 검증 에러가 발생한다") {
+                    violations.shouldNotBeEmpty()
+                    violations.any { it.propertyPath.toString() == "email" } shouldBe true
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("이메일 검증 실패 - 255자 이상")
-    fun `이메일 검증 실패 - 255자 이상`() {
-        // given
-        val email = "testasdfsdfsasdfdasasdfddasfdddudgfiausgdiufgisdugfiugasidugfiausgdfigusadftestasdfsdfsdfsdftsadfgsdgfiuagsidufgisudgfiausgdiufgisdugfiugasidugfiausgdfigusadftestasdfsdfsdfsdftsadfgsdgfiuagsidufgisudgfiausgdiufgisdugfiugasidugfiausgdfigusadfasdfdd@test.com"
-        val password = "securePassword123!"
-        val name = "홍길동"
+    context("이메일 검증 실패 - 255자 이상") {
+        Given("255자 이상의 이메일이 주어지고") {
+            val email = "testasdfsdfsasdfdasasdfddasfdddudgfiausgdiufgisdugfiugasidugfiausgdfigusadftestasdfsdfsdfsdftsadfgsdgfiuagsidufgisudgfiausgdiufgisdugfiugasidugfiausgdfigusadftestasdfsdfsdfsdftsadfgsdgfiuagsidufgisudgfiausgdiufgisdugfiugasidugfiausgdfigusadfasdfdd@test.com"
+            val password = "securePassword123!"
+            val name = "홍길동"
 
-        // when
-        val violations = validator.validate(SignUpRequest(email, password, name))
+            When("SignUpRequest를 검증하면") {
+                val violations = validator.validate(SignUpRequest(email, password, name))
 
-        // then
-        assertTrue(violations.isNotEmpty())
-        assertTrue(violations.any { it.propertyPath.toString() == "email" })
+                Then("이메일 검증 에러가 발생한다") {
+                    violations.shouldNotBeEmpty()
+                    violations.any { it.propertyPath.toString() == "email" } shouldBe true
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("패스워드 검증 실패 - 패스워드 7자 이하")
-    fun `패스워드 검증 실패 - 패스워드 7자 이하`() {
-        // given
-        val email = "test@example.com"
-        val password = "pass1!"
-        val name = "홍길동"
+    context("패스워드 검증 실패 - 패스워드 7자 이하") {
+        Given("7자 이하의 패스워드가 주어지고") {
+            val email = "test@example.com"
+            val password = "pass1!"
+            val name = "홍길동"
 
-        // when
-        val violations = validator.validate(SignUpRequest(email, password, name))
+            When("SignUpRequest를 검증하면") {
+                val violations = validator.validate(SignUpRequest(email, password, name))
 
-        // then
-        assertTrue(violations.isNotEmpty())
-        assertTrue(violations.any { it.propertyPath.toString() == "password" })
+                Then("패스워드 검증 에러가 발생한다") {
+                    violations.shouldNotBeEmpty()
+                    violations.any { it.propertyPath.toString() == "password" } shouldBe true
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("패스워드 검증 실패 - 패스워드 65자 이상")
-    fun `패스워드 검증 실패 - 패스워드 65자 이상`() {
-        // given
-        val email = "test@example.com"
-        val password = "verylongpasswordverylongpasswordverylongpasswordverylongpaslong1!"
-        val name = "홍길동"
+    context("패스워드 검증 실패 - 패스워드 65자 이상") {
+        Given("65자 이상의 패스워드가 주어지고") {
+            val email = "test@example.com"
+            val password = "verylongpasswordverylongpasswordverylongpasswordverylongpaslong1!"
+            val name = "홍길동"
 
-        // when
-        val violations = validator.validate(SignUpRequest(email, password, name))
+            When("SignUpRequest를 검증하면") {
+                val violations = validator.validate(SignUpRequest(email, password, name))
 
-        // then
-        assertTrue(violations.isNotEmpty())
-        assertTrue(violations.any { it.propertyPath.toString() == "password" })
+                Then("패스워드 검증 에러가 발생한다") {
+                    violations.shouldNotBeEmpty()
+                    violations.any { it.propertyPath.toString() == "password" } shouldBe true
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("패스워드 검증 실패 - 숫자 없음")
-    fun `패스워드 검증 실패 - 숫자 없음`() {
-        // given
-        val email = "test@example.com"
-        val password = "passwordwithoutdigit!"
-        val name = "홍길동"
+    context("패스워드 검증 실패 - 숫자 없음") {
+        Given("숫자가 없는 패스워드가 주어지고") {
+            val email = "test@example.com"
+            val password = "passwordwithoutdigit!"
+            val name = "홍길동"
 
-        // when
-        val violations = validator.validate(SignUpRequest(email, password, name))
+            When("SignUpRequest를 검증하면") {
+                val violations = validator.validate(SignUpRequest(email, password, name))
 
-        // then
-        assertTrue(violations.isNotEmpty())
-        assertTrue(violations.any { it.propertyPath.toString() == "password" })
+                Then("패스워드 검증 에러가 발생한다") {
+                    violations.shouldNotBeEmpty()
+                    violations.any { it.propertyPath.toString() == "password" } shouldBe true
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("패스워드 검증 실패 - 특수문자 없음")
-    fun `패스워드 검증 실패 - 특수문자 없음`() {
-        // given
-        val email = "test@example.com"
-        val password = "passwordwithoutspecial123"
-        val name = "홍길동"
+    context("패스워드 검증 실패 - 특수문자 없음") {
+        Given("특수문자가 없는 패스워드가 주어지고") {
+            val email = "test@example.com"
+            val password = "passwordwithoutspecial123"
+            val name = "홍길동"
 
-        // when
-        val violations = validator.validate(SignUpRequest(email, password, name))
+            When("SignUpRequest를 검증하면") {
+                val violations = validator.validate(SignUpRequest(email, password, name))
 
-        // then
-        assertTrue(violations.isNotEmpty())
-        assertTrue(violations.any { it.propertyPath.toString() == "password" })
+                Then("패스워드 검증 에러가 발생한다") {
+                    violations.shouldNotBeEmpty()
+                    violations.any { it.propertyPath.toString() == "password" } shouldBe true
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("이름 검증 실패 - 이름 공백")
-    fun `이름 검증 실패 - 이름 공백`() {
-        // given
-        val email = "test@example.com"
-        val password = "securePassword123!"
-        val name = ""
+    context("이름 검증 실패 - 이름 공백") {
+        Given("빈 이름이 주어지고") {
+            val email = "test@example.com"
+            val password = "securePassword123!"
+            val name = ""
 
-        // when
-        val violations = validator.validate(SignUpRequest(email, password, name))
+            When("SignUpRequest를 검증하면") {
+                val violations = validator.validate(SignUpRequest(email, password, name))
 
-        // then
-        assertTrue(violations.isNotEmpty())
-        assertTrue(violations.any { it.propertyPath.toString() == "name" })
+                Then("이름 검증 에러가 발생한다") {
+                    violations.shouldNotBeEmpty()
+                    violations.any { it.propertyPath.toString() == "name" } shouldBe true
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("이름 검증 실패 - 이름 21자 이상")
-    fun `이름 검증 실패 - 이름 21자 이상`() {
-        // given
-        val email = "test@example.com"
-        val password = "securePassword123!"
-        val name = "가".repeat(21)
+    context("이름 검증 실패 - 이름 21자 이상") {
+        Given("21자 이상의 이름이 주어지고") {
+            val email = "test@example.com"
+            val password = "securePassword123!"
+            val name = "가".repeat(21)
 
-        // when
-        val violations = validator.validate(SignUpRequest(email, password, name))
+            When("SignUpRequest를 검증하면") {
+                val violations = validator.validate(SignUpRequest(email, password, name))
 
-        // then
-        assertTrue(violations.isNotEmpty())
-        assertTrue(violations.any { it.propertyPath.toString() == "name" })
+                Then("이름 검증 에러가 발생한다") {
+                    violations.shouldNotBeEmpty()
+                    violations.any { it.propertyPath.toString() == "name" } shouldBe true
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("이름 검증 성공 - 이름 1자")
-    fun `이름 검증 성공 - 이름 1자`() {
-        // given
-        val email = "test@example.com"
-        val password = "securePassword123!"
-        val name = "홍"
+    context("이름 검증 성공 - 이름 1자") {
+        Given("1자 이름이 주어지고") {
+            val email = "test@example.com"
+            val password = "securePassword123!"
+            val name = "홍"
 
-        // when
-        val violations = validator.validate(SignUpRequest(email, password, name))
+            When("SignUpRequest를 검증하면") {
+                val violations = validator.validate(SignUpRequest(email, password, name))
 
-        // then
-        assertTrue(violations.isEmpty())
+                Then("검증 에러가 없다") {
+                    violations.shouldBeEmpty()
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("이름 검증 성공 - 이름 20자")
-    fun `이름 검증 성공 - 이름 20자`() {
-        // given
-        val email = "test@example.com"
-        val password = "securePassword123!"
-        val name = "가".repeat(20)
+    context("이름 검증 성공 - 이름 20자") {
+        Given("20자 이름이 주어지고") {
+            val email = "test@example.com"
+            val password = "securePassword123!"
+            val name = "가".repeat(20)
 
-        // when
-        val violations = validator.validate(SignUpRequest(email, password, name))
+            When("SignUpRequest를 검증하면") {
+                val violations = validator.validate(SignUpRequest(email, password, name))
 
-        // then
-        assertTrue(violations.isEmpty())
+                Then("검증 에러가 없다") {
+                    violations.shouldBeEmpty()
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("equals - 같은 값을 가진 SignUpRequest는 동등함")
-    fun `equals - 같은 값을 가진 SignUpRequest는 동등함`() {
-        // given
-        val request1 = SignUpRequest("test@example.com", "password123!", "홍길동")
-        val request2 = SignUpRequest("test@example.com", "password123!", "홍길동")
+    context("equals - 같은 값을 가진 SignUpRequest는 동등함") {
+        Given("같은 값을 가진 두 개의 SignUpRequest가 있고") {
+            val request1 = SignUpRequest("test@example.com", "password123!", "홍길동")
+            val request2 = SignUpRequest("test@example.com", "password123!", "홍길동")
 
-        // when & then
-        assertEquals(request1, request2)
+            When("두 객체를 비교하면") {
+                val result = request1 == request2
+
+                Then("동등하다") {
+                    result shouldBe true
+                    request1 shouldBe request2
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("equals - 다른 값을 가진 SignUpRequest는 동등하지 않음")
-    fun `equals - 다른 값을 가진 SignUpRequest는 동등하지 않음`() {
-        // given
-        val request1 = SignUpRequest("test1@example.com", "password123!", "홍길동")
-        val request2 = SignUpRequest("test2@example.com", "password123!", "김철수")
+    context("equals - 다른 값을 가진 SignUpRequest는 동등하지 않음") {
+        Given("다른 값을 가진 두 개의 SignUpRequest가 있고") {
+            val request1 = SignUpRequest("test1@example.com", "password123!", "홍길동")
+            val request2 = SignUpRequest("test2@example.com", "password123!", "김철수")
 
-        // when & then
-        assertNotEquals(request1, request2)
+            When("두 객체를 비교하면") {
+                val result = request1 == request2
+
+                Then("동등하지 않다") {
+                    result shouldBe false
+                    request1 shouldNotBe request2
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("hashCode - 같은 값을 가진 SignUpRequest는 같은 hashCode")
-    fun `hashCode - 같은 값을 가진 SignUpRequest는 같은 hashCode`() {
-        // given
-        val request1 = SignUpRequest("test@example.com", "password123!", "홍길동")
-        val request2 = SignUpRequest("test@example.com", "password123!", "홍길동")
+    context("hashCode - 같은 값을 가진 SignUpRequest는 같은 hashCode") {
+        Given("같은 값을 가진 두 개의 SignUpRequest가 있고") {
+            val request1 = SignUpRequest("test@example.com", "password123!", "홍길동")
+            val request2 = SignUpRequest("test@example.com", "password123!", "홍길동")
 
-        // when & then
-        assertEquals(request1.hashCode(), request2.hashCode())
+            When("hashCode를 비교하면") {
+                val hashCode1 = request1.hashCode()
+                val hashCode2 = request2.hashCode()
+
+                Then("같은 hashCode를 가진다") {
+                    hashCode1 shouldBe hashCode2
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("copy - 일부 프로퍼티 변경")
-    fun `copy - 일부 프로퍼티 변경`() {
-        // given
-        val original = SignUpRequest("original@example.com", "password123!", "홍길동")
-        val newEmail = "new@example.com"
+    context("copy - 일부 프로퍼티 변경") {
+        Given("원본 SignUpRequest가 있고") {
+            val original = SignUpRequest("original@example.com", "password123!", "홍길동")
+            val newEmail = "new@example.com"
 
-        // when
-        val copied = original.copy(email = newEmail)
+            When("이메일만 변경하여 복사하면") {
+                val copied = original.copy(email = newEmail)
 
-        // then
-        assertEquals(newEmail, copied.email)
-        assertEquals(original.password, copied.password)
-        assertEquals(original.name, copied.name)
+                Then("이메일만 변경되고 나머지는 유지된다") {
+                    copied.email shouldBe newEmail
+                    copied.password shouldBe original.password
+                    copied.name shouldBe original.name
+                }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("toString - 문자열 표현 포함")
-    fun `toString - 문자열 표현 포함`() {
-        // given
-        val request = SignUpRequest("test@example.com", "password123!", "홍길동")
+    context("toString - 문자열 표현 포함") {
+        Given("SignUpRequest가 있고") {
+            val request = SignUpRequest("test@example.com", "password123!", "홍길동")
 
-        // when
-        val result = request.toString()
+            When("toString을 호출하면") {
+                val result = request.toString()
 
-        // then
-        assertNotNull(result)
-        assertTrue(result.contains("SignUpRequest"))
-        assertTrue(result.contains("test@example.com"))
-        assertTrue(result.contains("홍길동"))
+                Then("문자열 표현이 포함된다") {
+                    result shouldNotBe null
+                    result.shouldContain("SignUpRequest")
+                    result.shouldContain("test@example.com")
+                    result.shouldContain("홍길동")
+                }
+            }
+        }
     }
-}
+
+})
