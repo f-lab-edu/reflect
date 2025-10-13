@@ -45,21 +45,6 @@ class ServiceExceptionHandler {
         return ResponseEntity(problemDetail, HttpStatus.CONFLICT)
     }
 
-    @ExceptionHandler(LockAcquisitionException::class)
-    fun handleLockAcquisitionException(
-        ex: LockAcquisitionException,
-        request: HttpServletRequest
-    ): ResponseEntity<ApiErrorResponseSpec> {
-        val problemDetail = BasicErrorResponse(
-            title = "LOCK_ACQUIRE_FAILED",
-            status = HttpStatus.CONFLICT.value(),
-            detail = "요청이 많아 실패했습니다, 다시 시도해주세요",
-            instance = request.requestURI
-        )
-
-        return ResponseEntity(problemDetail, HttpStatus.CONFLICT)
-    }
-
     /**
      * MethodArgumentNotValidException 처리
      * RFC 9457 Problem Details 표준에 따른 응답 반환
