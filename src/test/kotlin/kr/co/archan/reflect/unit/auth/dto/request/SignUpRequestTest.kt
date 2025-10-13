@@ -5,7 +5,11 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import jakarta.validation.Validation
 import jakarta.validation.Validator
+<<<<<<<< HEAD:src/test/kotlin/kr/co/archan/reflect/unit/auth/dto/request/SignUpRequestTest.kt
 import kr.co.archan.reflect.auth.dto.request.SignUpRequest
+========
+import kr.co.archan.reflect.auth.dto.request.LoginRequest
+>>>>>>>> 8f90f043d7ddcabb11cf3af554c7f4d4413b218c:src/test/kotlin/kr/co/archan/reflect/unit/auth/dto/request/LoginRequestTest.kt
 
 class SignUpRequestTest {
 
