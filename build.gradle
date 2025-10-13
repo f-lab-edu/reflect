@@ -41,12 +41,15 @@ dependencies {
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-mysql'
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.79'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
     testImplementation 'io.mockk:mockk:1.14.5'
+    testImplementation 'io.kotest:kotest-runner-junit5:5.9.1'
+    testImplementation 'io.kotest:kotest-assertions-core:5.9.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 

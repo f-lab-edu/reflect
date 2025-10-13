@@ -1,11 +1,13 @@
 package kr.co.archan.reflect.member.exception.types
 
 import kr.co.archan.reflect.global.exception.types.InvalidInputErrorSpec
+import org.springframework.http.HttpStatus
 
 enum class MemberInvalidInputField(
     override val invalidField: String,
     override val systemMessage: String,
     override val userMessage: String,
+    override val httpStatus: HttpStatus = HttpStatus.BAD_REQUEST
 ): InvalidInputErrorSpec {
     EMAIL(
         invalidField = "email",

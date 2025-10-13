@@ -1,10 +1,8 @@
 package kr.co.archan.reflect.global.security.converter
 
 import kr.co.archan.reflect.auth.domain.MemberPrincipal
-import kr.co.archan.reflect.auth.exception.common.JwtAuthException
-import kr.co.archan.reflect.auth.exception.common.JwtClaimFormatException
-import kr.co.archan.reflect.auth.exception.common.JwtConversionException
-import kr.co.archan.reflect.auth.exception.common.JwtRequiredClaimMissingException
+import kr.co.archan.reflect.auth.exception.common.AuthException
+import kr.co.archan.reflect.auth.exception.types.AuthErrorCode
 import org.springframework.core.convert.converter.Converter
 import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -18,16 +16,16 @@ class JwtAuthConverter : Converter<Jwt, AbstractAuthenticationToken> {
         try {
             // 필수 클레임 검증
             val memberIdStr = jwt.getClaimAsString("member_id")
-                ?: throw JwtRequiredClaimMissingException()
+                ?: throw AuthException(AuthErrorCode.JWT_REQUIRED_CLAIM_MISSING)
             
             val email = jwt.getClaimAsString("email")
-                ?: throw JwtRequiredClaimMissingException()
+                ?: throw AuthException(AuthErrorCode.JWT_REQUIRED_CLAIM_MISSING)
             
             // memberId 타입 변환
             val memberId = try {
                 memberIdStr.toLong()
             } catch (e: NumberFormatException) {
-                throw JwtClaimFormatException()
+                throw AuthException(AuthErrorCode.JWT_CLAIM_FORMAT_INVALID)
             }
             
             val principal = MemberPrincipal(memberId = memberId, email = email)
@@ -37,10 +35,10 @@ class JwtAuthConverter : Converter<Jwt, AbstractAuthenticationToken> {
             
             return UsernamePasswordAuthenticationToken(principal, "N/A", authorities)
             
-        } catch (e: JwtAuthException) {
+        } catch (e: AuthException) {
             throw e
         } catch (e: Exception) {
-            throw JwtConversionException()
+            throw AuthException(AuthErrorCode.JWT_CONVERSION_FAILED)
         }
     }
 }
