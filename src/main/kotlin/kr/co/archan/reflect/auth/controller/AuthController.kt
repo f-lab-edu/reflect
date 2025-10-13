@@ -15,18 +15,18 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/auth")
-class AuthController (
+class AuthController(
     private val authService: AuthService
-){
+) {
     @PostMapping("/login")
-    fun login(@Valid @RequestBody request: LoginRequest) : ResponseEntity<LoginResponse> {
-        val result = authService.loginMember(request.email, request.password)
-        return ResponseEntity.ok().body(LoginResponse(accessToken = result.accessToken.value, refreshToken = result.refreshToken.value))
-    }
+    fun login(@Valid @RequestBody request: LoginRequest): ResponseEntity<LoginResponse> =
+        authService.loginMember(request.email, request.password).run {
+            ResponseEntity.ok(LoginResponse(accessToken.value, refreshToken.value))
+        }
 
     @PostMapping("/signup")
-    fun signup(@Valid @RequestBody request: SignUpRequest) : ResponseEntity<SignUpResponse> {
-        val result = authService.signUpMember(request.email, request.password, request.name)
-        return ResponseEntity.status(HttpStatus.CREATED).body(SignUpResponse(accessToken = result.accessToken.value, refreshToken = result.refreshToken.value))
-    }
+    fun signup(@Valid @RequestBody request: SignUpRequest): ResponseEntity<SignUpResponse> =
+        authService.signUpMember(request.email, request.password, request.name).run {
+            ResponseEntity.status(HttpStatus.CREATED).body(SignUpResponse(accessToken.value, refreshToken.value))
+        }
 }
