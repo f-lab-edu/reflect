@@ -1,6 +1,5 @@
 package kr.co.archan.reflect.member.service
 
-import kr.co.archan.reflect.global.annotation.DistributedLock
 import kr.co.archan.reflect.member.domain.Member
 import kr.co.archan.reflect.member.exception.common.MemberException
 import kr.co.archan.reflect.member.exception.types.MemberErrorCode

@@ -15,6 +15,7 @@ import kr.co.archan.reflect.auth.service.TokenService
 import kr.co.archan.reflect.global.exception.handler.ServiceExceptionHandler
 import kr.co.archan.reflect.global.properties.CryptoProperties
 import kr.co.archan.reflect.global.util.Crypto
+import kr.co.archan.reflect.global.util.DistributedLockManager
 import kr.co.archan.reflect.member.repository.MemberRepository
 import kr.co.archan.reflect.member.service.MemberService
 import org.springframework.http.MediaType
@@ -46,7 +47,8 @@ class AuthControllerTest : BehaviorSpec({
         val refreshTokenProvider = RefreshTokenProvider(jwtProperties, refreshTokenRepository)
         val tokenService = TokenService(accessTokenProvider, refreshTokenProvider)
         val memberService = MemberService(memberRepository)
-        val authService = AuthService(memberService, tokenService, crypto)
+        val distributedLockManager = mockk<DistributedLockManager>(relaxed = true)
+        val authService = AuthService(memberService, tokenService, crypto, distributedLockManager)
         val authController = AuthController(authService)
         val mockMvc = MockMvcBuilders.standaloneSetup(authController)
             .setControllerAdvice(ServiceExceptionHandler())

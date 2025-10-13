@@ -18,6 +18,7 @@ import kr.co.archan.reflect.auth.service.AuthService
 import kr.co.archan.reflect.auth.service.TokenService
 import kr.co.archan.reflect.global.properties.CryptoProperties
 import kr.co.archan.reflect.global.util.Crypto
+import kr.co.archan.reflect.global.util.DistributedLockManager
 import kr.co.archan.reflect.member.domain.Member
 import kr.co.archan.reflect.member.exception.common.MemberException
 import kr.co.archan.reflect.member.exception.types.MemberErrorCode
@@ -47,7 +48,8 @@ class AuthServiceTest : BehaviorSpec({
         val refreshTokenProvider = RefreshTokenProvider(jwtProperties, refreshTokenRepository)
         val tokenService = TokenService(accessTokenProvider, refreshTokenProvider)
         val memberService = MemberService(memberRepository)
-        val authService = AuthService(memberService, tokenService, crypto)
+        val distributedLockManager = mockk<DistributedLockManager>(relaxed = true)
+        val authService = AuthService(memberService, tokenService, crypto, distributedLockManager)
     }
 
     context("loginMember - 올바른 이메일과 비밀번호로 로그인 성공") {
