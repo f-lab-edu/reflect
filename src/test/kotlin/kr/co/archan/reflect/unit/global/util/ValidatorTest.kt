@@ -2,6 +2,7 @@ package kr.co.archan.reflect.unit.global.util
 
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
+import kr.co.archan.reflect.global.util.Validator
 
 class ValidatorTest : BehaviorSpec({
 

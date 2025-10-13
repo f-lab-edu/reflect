@@ -7,6 +7,7 @@ import io.kotest.matchers.string.shouldMatch
 import io.kotest.matchers.string.shouldNotContain
 import io.kotest.matchers.string.shouldStartWith
 import kr.co.archan.reflect.global.properties.CryptoProperties
+import kr.co.archan.reflect.global.util.Crypto
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder
 
 class CryptoTest : BehaviorSpec({
@@ -196,8 +197,8 @@ class CryptoTest : BehaviorSpec({
 
                 Then("Argon2 해시가 생성된다") {
                     result shouldNotBe null
-                    result.isEmpty() shouldBe false
-                    result.shouldStartWith("\$argon2")
+                    result.value.isEmpty() shouldBe false
+                    result.value.shouldStartWith("\$argon2")
                 }
             }
         }
@@ -224,7 +225,7 @@ class CryptoTest : BehaviorSpec({
             val hashedPassword = crypto.hashPassword(password)
 
             When("비밀번호를 검증하면") {
-                val result = crypto.isPasswordMatches(hashedPassword, password)
+                val result = crypto.isPasswordMatches(hashedPassword.value, password)
 
                 Then("true가 반환된다") {
                     result shouldBe true
@@ -240,7 +241,7 @@ class CryptoTest : BehaviorSpec({
             val hashedPassword = crypto.hashPassword(password)
 
             When("잘못된 비밀번호를 검증하면") {
-                val result = crypto.isPasswordMatches(hashedPassword, wrongPassword)
+                val result = crypto.isPasswordMatches(hashedPassword.value, wrongPassword)
 
                 Then("false가 반환된다") {
                     result shouldBe false
@@ -255,8 +256,8 @@ class CryptoTest : BehaviorSpec({
             val hashedPassword = crypto.hashPassword(password)
 
             When("비밀번호를 검증하면") {
-                val correctResult = crypto.isPasswordMatches(hashedPassword, "Password")
-                val wrongResult = crypto.isPasswordMatches(hashedPassword, "password")
+                val correctResult = crypto.isPasswordMatches(hashedPassword.value, "Password")
+                val wrongResult = crypto.isPasswordMatches(hashedPassword.value, "password")
 
                 Then("대소문자가 다르면 false가 반환된다") {
                     correctResult shouldBe true
@@ -272,7 +273,7 @@ class CryptoTest : BehaviorSpec({
             val hashedPassword = crypto.hashPassword(password)
 
             When("비밀번호를 검증하면") {
-                val result = crypto.isPasswordMatches(hashedPassword, password)
+                val result = crypto.isPasswordMatches(hashedPassword.value, password)
 
                 Then("true가 반환된다") {
                     result shouldBe true
@@ -287,7 +288,7 @@ class CryptoTest : BehaviorSpec({
             val hashedPassword = crypto.hashPassword(password)
 
             When("빈 비밀번호를 검증하면") {
-                val result = crypto.isPasswordMatches(hashedPassword, password)
+                val result = crypto.isPasswordMatches(hashedPassword.value, password)
 
                 Then("true가 반환된다") {
                     result shouldBe true
@@ -302,8 +303,8 @@ class CryptoTest : BehaviorSpec({
             val hashedPassword = crypto.hashPassword(password)
 
             When("비밀번호를 검증하면") {
-                val correctResult = crypto.isPasswordMatches(hashedPassword, password)
-                val wrongResult = crypto.isPasswordMatches(hashedPassword, "a".repeat(99))
+                val correctResult = crypto.isPasswordMatches(hashedPassword.value, password)
+                val wrongResult = crypto.isPasswordMatches(hashedPassword.value, "a".repeat(99))
 
                 Then("올바른 비밀번호는 true, 다른 비밀번호는 false가 반환된다") {
                     correctResult shouldBe true
@@ -319,7 +320,7 @@ class CryptoTest : BehaviorSpec({
             val hashedPassword = crypto.hashPassword(password)
 
             When("비밀번호를 검증하면") {
-                val result = crypto.isPasswordMatches(hashedPassword, password)
+                val result = crypto.isPasswordMatches(hashedPassword.value, password)
 
                 Then("true가 반환된다") {
                     result shouldBe true

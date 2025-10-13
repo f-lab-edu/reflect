@@ -11,6 +11,7 @@ import io.mockk.mockk
 import kr.co.archan.reflect.auth.domain.MemberPrincipal
 import kr.co.archan.reflect.auth.exception.common.AuthException
 import kr.co.archan.reflect.auth.exception.types.AuthErrorCode
+import kr.co.archan.reflect.global.security.converter.JwtAuthConverter
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.oauth2.jwt.Jwt

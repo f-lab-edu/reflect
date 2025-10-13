@@ -1,7 +1,8 @@
 package kr.co.archan.reflect.auth.service
 
 import kr.co.archan.reflect.auth.dto.vo.AuthToken
-import kr.co.archan.reflect.auth.exception.common.WrongPasswordException
+import kr.co.archan.reflect.auth.exception.common.AuthException
+import kr.co.archan.reflect.auth.exception.types.AuthErrorCode
 import kr.co.archan.reflect.global.annotation.DistributedLock
 import kr.co.archan.reflect.global.util.Crypto
 import kr.co.archan.reflect.member.domain.Member
@@ -19,7 +20,7 @@ class AuthService (
     @Transactional(readOnly = true)
     fun loginMember(email: String, password: String) : AuthToken {
         val member = memberService.getMember(email)
-        if(!crypto.isPasswordMatches(member.password, password)) throw WrongPasswordException()
+        if(!crypto.isPasswordMatches(member.password, password)) throw AuthException(AuthErrorCode.WRONG_PASSWORD)
         return tokenService.issueToken(member)
     }
 

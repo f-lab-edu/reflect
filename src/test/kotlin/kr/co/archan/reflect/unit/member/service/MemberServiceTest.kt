@@ -13,12 +13,22 @@ import kr.co.archan.reflect.member.domain.Member
 import kr.co.archan.reflect.member.exception.common.MemberException
 import kr.co.archan.reflect.member.exception.types.MemberErrorCode
 import kr.co.archan.reflect.member.repository.MemberRepository
+import kr.co.archan.reflect.member.service.MemberService
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder
 
 class MemberServiceTest : BehaviorSpec({
     
     fun createTestComponents() = object {
         val memberRepository = mockk<MemberRepository>()
         val memberService = MemberService(memberRepository)
+        private val testPepperKey = "test-pepper-key"
+        val cryptoProperties = CryptoProperties(
+            hashKey = "test-secret-key",
+            pepperKey = testPepperKey
+        )
+        // 실제 Argon2PasswordEncoder 인스턴스 사용
+        val passwordEncoder = Argon2PasswordEncoder(16, 32, 1, 64 * 1024, 3)
+        val crypto = Crypto(cryptoProperties, passwordEncoder)
     }
 
     context("getMember - 이메일로 회원 조회 성공 (탈퇴하지 않은 회원만)") {
@@ -28,7 +38,7 @@ class MemberServiceTest : BehaviorSpec({
             val email = "test@example.com"
             val expectedMember = Member.signUp(
                 email = email,
-                password = "hashedPassword123",
+                hashedPassword = tc.crypto.hashPassword("password"),
                 name = "홍길동"
             )
             every { tc.memberRepository.findByEmailAndIsWithdrawnFalse(email) } returns expectedMember
@@ -73,8 +83,8 @@ class MemberServiceTest : BehaviorSpec({
             
             val email1 = "Test@example.com"
             val email2 = "test@example.com"
-            val member1 = Member.signUp(email1, "password1", "회원1")
-            val member2 = Member.signUp(email2, "password2", "회원2")
+            val member1 = Member.signUp(email1, tc.crypto.hashPassword("password1"), "회원1")
+            val member2 = Member.signUp(email2, tc.crypto.hashPassword("password2"), "회원2")
             
             every { tc.memberRepository.findByEmailAndIsWithdrawnFalse(email1) } returns member1
             every { tc.memberRepository.findByEmailAndIsWithdrawnFalse(email2) } returns member2

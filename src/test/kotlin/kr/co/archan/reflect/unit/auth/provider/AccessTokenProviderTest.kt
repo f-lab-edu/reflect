@@ -9,6 +9,7 @@ import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
 import kr.co.archan.reflect.auth.properties.JwtProperties
+import kr.co.archan.reflect.auth.provider.AccessTokenProvider
 import java.time.Instant
 import kotlin.math.abs
 

@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kr.co.archan.reflect.auth.domain.AccessToken
 import kr.co.archan.reflect.auth.domain.RefreshToken
+import kr.co.archan.reflect.auth.dto.vo.AuthToken
 import java.time.Instant
 
 class AuthTokenTest : BehaviorSpec({
