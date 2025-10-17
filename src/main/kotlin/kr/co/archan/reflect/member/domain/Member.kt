@@ -1,6 +1,7 @@
 package kr.co.archan.reflect.member.domain
 
 import jakarta.persistence.*
+import kr.co.archan.reflect.member.dto.vo.HashedPassword
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
@@ -16,7 +17,7 @@ data class Member protected constructor(
     @Column(name = "id", nullable = false)
     val id: Long = 0L,
 
-    @Column(name = "email", length = 254, nullable = false, unique = true)
+    @Column(name = "email", length = 254, nullable = false)
     val email: String,
 
     @Column(name = "password", length = 512, nullable = false)
@@ -39,8 +40,8 @@ data class Member protected constructor(
 ) {
 
     companion object {
-        fun signUp(email: String, password: String, name: String): Member {
-            return Member(email = email, password = password, name = name)
+        fun signUp(email: String, hashedPassword: HashedPassword, name: String): Member {
+            return Member(email = email, password = hashedPassword.value, name = name)
         }
     }
 

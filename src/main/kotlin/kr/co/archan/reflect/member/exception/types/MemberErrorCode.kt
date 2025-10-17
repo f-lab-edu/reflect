@@ -13,6 +13,11 @@ enum class MemberErrorCode(
         systemMessage = "Member not found",
         userMessage = "존재하지 않는 회원입니다.",
         httpStatus = HttpStatus.BAD_REQUEST
+    ),
+    MEMBER_ALREADY_EXIST(
+        systemMessage = "Member already exist",
+        userMessage = "이미 존재하는 회원입니다.",
+        httpStatus = HttpStatus.CONFLICT
     )
 }
 

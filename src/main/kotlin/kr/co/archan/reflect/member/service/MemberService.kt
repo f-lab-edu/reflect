@@ -13,7 +13,15 @@ class MemberService (
     private val memberRepository: MemberRepository
 ){
 
-    @Transactional
+    @Transactional(propagation = Propagation.MANDATORY)
+    fun saveNewMember(member: Member) : Member {
+        if (memberRepository.existsByEmailAndIsWithdrawnFalse(member.email)) {
+            throw MemberException(MemberErrorCode.MEMBER_ALREADY_EXIST)
+        }
+        return memberRepository.save(member)
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
     fun getMember(email: String) : Member {
         return memberRepository.findByEmailAndIsWithdrawnFalse(email) ?: throw MemberException(MemberErrorCode.MEMBER_NOT_FOUND)
     }

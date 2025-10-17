@@ -23,8 +23,8 @@ class SecurityConfig(
             .csrf { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
-                it.requestMatchers("/member/signup").permitAll()
-                it.requestMatchers("/member/login").permitAll()
+                it.requestMatchers("/auth/signup").permitAll()
+                it.requestMatchers("/auth/login").permitAll()
                 it.anyRequest().authenticated()
             }
             .oauth2ResourceServer { rs ->
